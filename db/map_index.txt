@@ -1007,3 +1007,28 @@ c_tower3_
 //
 //mymap	1250
 //mymap-2
+
+mall01 1250
+bat_a03 1251
+bat_a04 1252
+bat_a05 1253
+bat_b03 1254
+bat_b04 1255
+bat_b05 1256
+schg_cas06 1257
+schg_cas07 1258
+schg_cas08 1259
+arug_cas06 1260
+arug_cas07 1261
+arug_cas08 1262
+rush_cas01 1263
+rush_cas02 1264
+rush_cas03 1265
+rush_cas04 1266
+bat_c04 1267
+bat_c05 1268
+bat_c06 1269
+bat_c07 1270
+bat_c08 1271
+region_8 1272
+

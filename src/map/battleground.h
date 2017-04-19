@@ -61,12 +61,14 @@ struct battleground_member_data {
 };
 
 struct battleground_data {
+
 	unsigned int bg_id;
 	unsigned char count;
 	struct battleground_member_data members[MAX_BG_MEMBERS];
 	// BG Cementery
 	unsigned short mapindex, x, y;
 	// Logout Event
+	int reveal_pos_sub, reveal_flag;
 	char logout_event[EVENT_NAME_LENGTH];
 	char die_event[EVENT_NAME_LENGTH];
 	struct hplugin_data_store *hdata; ///< HPM Plugin Data Store
@@ -124,7 +126,7 @@ struct battleground_interface {
 	struct map_session_data* (*getavailablesd) (struct battleground_data *bgd);
 	bool (*team_delete) (int bg_id);
 	bool (*team_warp) (int bg_id, unsigned short map_index, short x, short y);
-	void (*send_dot_remove) (struct map_session_data *sd);
+	int (*send_dot_remove) (struct map_session_data *sd);
 	bool (*team_join) (int bg_id, struct map_session_data *sd);
 	int (*team_leave) (struct map_session_data *sd, enum bg_team_leave_type flag);
 	bool (*member_respawn) (struct map_session_data *sd);
@@ -135,6 +137,10 @@ struct battleground_interface {
 	int (*send_xy_timer) (int tid, int64 tick, int id, intptr_t data);
 	int (*afk_timer) (int tid, int64 tick, int id, intptr_t data);
 	int (*team_db_final) (union DBKey key, struct DBData *data, va_list ap);
+	void (*team_rewards) (int bg_id, int nameid, int amount, int kafrapoints, int quest_id, const char *var, int add_value, int bg_arena, int bg_result);
+	void (*team_getitem) (int bg_id, int nameid, int amount);
+	void (*team_get_kafrapoints) (int bg_id, int amount);
+	int (*reveal_pos_sub) (struct block_list *bl, va_list ap);
 	/* */
 	enum bg_queue_types (*str2teamtype) (const char *str);
 	/* */

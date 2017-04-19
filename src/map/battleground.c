@@ -19,7 +19,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #define HERCULES_CORE
-
+#include "../common/utils.h"
 #include "battleground.h"
 
 #include "map/battle.h"
@@ -43,6 +43,8 @@
 #include "common/socket.h"
 #include "common/strlib.h"
 #include "common/timer.h"
+#include "log.h"
+#include "quest.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -91,9 +93,57 @@ bool bg_team_warp(int bg_id, unsigned short map_index, short x, short y) {
 	return true;
 }
 
-void bg_send_dot_remove(struct map_session_data *sd) {
-	if( sd && sd->bg_id )
+int bg_send_dot_remove(struct map_session_data *sd)
+{
+	struct battleground_data *bgd;
+	int m;
+
+	if( sd && sd->bg_id && (bgd = bg->team_search(sd->bg_id)) != NULL )
+	{
 		clif->bg_xy_remove(sd);
+		if( bg->reveal_pos_sub && (m = map->mapindex2mapid(bgd->mapindex)) == sd->bl.m )
+			map->foreachinmap(bg->reveal_pos_sub, m, BL_PC, sd, 2, 0xFFFFFF);
+	}
+	return true;
+}
+
+void bg_team_rewards(int bg_id, int nameid, int amount, int kafrapoints, int quest_id, const char *var, int add_value, int bg_arena, int bg_result)
+{
+	struct battleground_data *bg;
+	struct map_session_data *sd;
+	struct item_data *id;
+	struct item it;
+	int j, flag;
+
+	if( amount < 1 || (bg = bg_team_search(bg_id)) == NULL || (id = itemdb->exists(nameid)) == NULL )
+		return;
+
+	bg_result = cap_value(bg_result,0,2);
+	memset(&it,0,sizeof(it));
+	if( nameid == 7828 || nameid == 7829 || nameid == 7773 )
+	{
+		it.nameid = nameid;
+		it.identify = 1;
+	}
+	else nameid = 0;
+
+	for( j = 0; j < MAX_BG_MEMBERS; j++ )
+	{
+		if( (sd = bg->members[j].sd) == NULL )
+			continue;
+
+		if( quest_id ) quest->add(sd,quest_id);
+		pc_setglobalreg(sd,script->add_str(var), add_value);
+
+		if( kafrapoints > 0 )
+			pc->getcash(sd,0,kafrapoints);
+
+		if( nameid && amount > 0 )
+		{
+			if( (flag = pc->additem(sd,&it,amount,LOG_TYPE_NONE)) )
+				clif->additem(sd,0,0,flag);
+		}
+	}
 }
 
 /// Player joins team
@@ -191,10 +241,15 @@ bool bg_member_respawn(struct map_session_data *sd) {
 		return false;
 	if( bgd->mapindex == 0 )
 		return false; // Respawn not handled by Core
-	pc->setpos(sd, bgd->mapindex, bgd->x, bgd->y, CLR_OUTSIGHT);
-	status->revive(&sd->bl, 1, 100);
-
-	return true; // Warped
+	
+	if( map->list[sd->bl.m].flag.battleground )
+	{
+		pc->setpos(sd, bgd->mapindex, bgd->x, bgd->y, CLR_OUTSIGHT);
+		status->revive(&sd->bl, 1, 100);
+		return true; // Warped		
+	}
+	
+	return false;
 }
 
 int bg_create(unsigned short map_index, short rx, short ry, const char *ev, const char *dev) {
@@ -214,6 +269,70 @@ int bg_create(unsigned short map_index, short rx, short ry, const char *ev, cons
 	idb_put(bg->team_db, bg->team_counter, bgd);
 
 	return bgd->bg_id;
+}
+
+// after bg_create function add:
+
+int bg_reveal_pos_sub(struct block_list *bl, va_list ap)
+{
+	struct map_session_data *pl_sd, *sd = NULL;
+	int flag, color;
+
+	pl_sd = (struct map_session_data *)bl;
+	sd = va_arg(ap,struct map_session_data *); // Source
+	flag = va_arg(ap,int);
+	color = va_arg(ap,int);
+
+	if( pl_sd->bg_id == sd->bg_id )
+		return false; // Same Team
+
+	clif->viewpoint(pl_sd,sd->bl.id,flag,sd->bl.x,sd->bl.y,sd->bl.id,color);
+	return true;
+}
+
+void bg_team_getitem(int bg_id, int nameid, int amount)
+{
+	struct battleground_data *bg;
+	struct map_session_data *sd;
+	struct item_data *id;
+	struct item it;
+	int j, flag;
+
+	if( amount < 1 || (bg = bg_team_search(bg_id)) == NULL || (id = itemdb->exists(nameid)) == NULL )
+		return;
+	if( nameid != 7828 && nameid != 7829 && nameid != 7773 )
+		return;
+
+	memset(&it, 0, sizeof(it));
+	it.nameid = nameid;
+	it.identify = 1;
+
+	for( j = 0; j < MAX_BG_MEMBERS; j++ )
+	{
+		if( (sd = bg->members[j].sd) == NULL )
+			continue;
+
+		if( (flag = pc->additem(sd,&it,amount,LOG_TYPE_NONE)) )
+			clif->additem(sd,0,0,flag);
+	}
+}
+
+void bg_team_get_kafrapoints(int bg_id, int amount)
+{
+	struct battleground_data *bg;
+	struct map_session_data *sd;
+	int i;
+
+	if( (bg = bg_team_search(bg_id)) == NULL )
+		return;
+
+	for( i = 0; i < MAX_BG_MEMBERS; i++ )
+	{
+		if( (sd = bg->members[i].sd) == NULL )
+			continue;
+
+		pc->getcash(sd, 0, amount);
+	}
 }
 
 int bg_team_get_id(struct block_list *bl) {
@@ -978,6 +1097,10 @@ void battleground_defaults(void) {
 	bg->match_over = bg_match_over;
 	bg->queue_check = bg_queue_check;
 	bg->team_search = bg_team_search;
+	bg->team_rewards = bg_team_rewards;
+	bg->team_getitem = bg_team_getitem;
+	bg->team_get_kafrapoints = bg_team_get_kafrapoints;
+	bg->reveal_pos_sub = bg_reveal_pos_sub;
 	bg->getavailablesd = bg_getavailablesd;
 	bg->team_delete = bg_team_delete;
 	bg->team_warp = bg_team_warp;

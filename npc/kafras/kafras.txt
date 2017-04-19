@@ -240,18 +240,14 @@ pay_arche,55,123,0	script	Kafra Employee::kaf_payon3	4_F_KAFRA3,{
 }
 
 //== Prontera ==============================================
-prontera,152,326,3	script	Kafra Employee::kaf_prontera	4_F_KAFRA6,{
+prontera,165,193,4	script	Kafra Employee::kaf_prontera	4_MAL_KAFRA,{
 	cutin "kafra_06",2;
 	callfunc "F_KafSet";
-	mes "[Kafra Employee]";
-	mes "Welcome to the";
-	mes "Kafra Corporation~";
-	mes "The Kafra Services are";
-	mes "always here to support";
-	mes "you. So how can I be";
-	mes "of service today?";
+	mes "[Kafra]";
+	mes "Bienvenue";
+	mes "En quoi puis-je vous aider ?";
 	callfunc "F_Kafra",5,0,0,40,800;
-	savepoint "prontera",157,327;
+	savepoint "prontera",156,188;
 	callfunc "F_KafEnd",0,1,"in the city of Prontera";
 }
 

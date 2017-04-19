@@ -10,3 +10,5 @@
 // Use the base folder, not the data\ path.
 //-----------------------------------------
 //data_dir: C:\Program Files\Gravity\RO\
+data_dir: D:\Ragnarok\RemasteredRo\Client\Ro_patched
+grf: D:\Ragnarok\RemasteredRo\Client\data.grf

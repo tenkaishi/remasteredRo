@@ -1,0 +1,67 @@
+//===== Hercules Script ======================================
+//= PVP No MVP Card
+//===== By ===================================================
+//= Max
+//===== Version ==============================================
+//= 1.0
+//===== Compatible With ======================================
+//= eAthena , rAthena , Hercules
+//===== Description ==========================================
+//= This is a PVP NO MVP Card , if player bring MVP Cards ,
+//  they cannot enter this PVP Map
+//===== Warper NPC ===========================================
+prontera,143,196,4	script	PVP Warpeur	4_F_HUNTER_EVIL,{
+//============================================================
+	mes "[PvP Warpeur]";
+	mes "Salut";
+	mes "Voulez-vous pvp ?";
+	next;
+	menu "PVP No MVP Card ^FF0000["+getmapusers("pvp_n_1-5")+"/100]^000000",-,"Non, Non, je passais juste.",S_exit;
+
+		if (getmapusers("pvp_n_1-5") > 99) callsub S_full;
+		for( set .@i,0; .@i<getarraysize(.NoMVP_ids); set .@i,.@i+1 ) {
+			if (countitem(.NoMVP_ids[.@i])) {
+				mes "Les MvP/MiniBoss Card sont interdites.";
+				close;
+			}
+		}
+		set .@random, rand(1,4);
+		if (.@random == 1) {
+			warp "pvp_n_1-5",65,99;
+		} else if (.@random == 2) {
+			warp "pvp_n_1-5",100,134;
+		} else if (.@random == 3) {
+			warp "pvp_n_1-5",134,99;
+		} else  {
+			warp "pvp_n_1-5",99,65;
+		}
+		end;
+ 
+S_full:
+	mes "[PvP Warpeur]";
+	mes "Désolé la salle est pleine, attends que quelqu'un meurt...";
+	close;
+
+S_exit:
+	mes "[PvP Warpeur]";
+	mes "Au Revoir.";
+	close;
+ 
+	// items not allowed in Non MVP Card PVP
+	setarray .NoMVP_ids[0], 12211, 4054, 4241, 4426, 4290, 4169, 4174, 4451, 4354, 4047, 4198, 4440, 4427, 4236, 4359, 4425, 4372, 4147, 4145, 4168, 4386, 4142, 4134, 4137, 4123, 4330, 4441, 4324, 4408, 4128, 4363, 4365, 4430, 4263, 4403, 4318, 4419, 4376, 4357, 4276, 4146, 4132, 4131, 4143, 4135, 4144, 4148, 4121, 4342, 4367, 4302, 4399, 4305, 4407, 4374, 4361, 4352;
+	end;
+}
+
+// MAPFLAG
+
+pvp_n_1-5	mapflag	nowarp
+pvp_n_1-5	mapflag	nosave
+pvp_n_1-5	mapflag	noteleport
+pvp_n_1-5	mapflag	nodrop
+pvp_n_1-5	mapflag	nocommand	99
+pvp_n_1-5	mapflag	nobranch
+pvp_n_1-5	mapflag	pvp_noparty
+pvp_n_1-5	mapflag	nomemo
+pvp_n_1-5	mapflag	nopenalty
+pvp_n_1-5	mapflag	novending
+pvp_n_1-5	mapflag	notrade

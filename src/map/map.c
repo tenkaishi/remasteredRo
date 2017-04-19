@@ -5245,7 +5245,229 @@ bool map_zone_mf_cache(int m, char *flag, char *params) {
 			else if( map->list[m].flag.nocashshop )
 				map_zone_mf_cache_add(m,"nocashshop");
 		}
-	}
+	} else if( !strcmpi(flag,"mall01")) {
+        if( state && map->list[m].flag.mall01 )
+            ; /* nothing to do */
+        else {
+            if( state )
+                map_zone_mf_cache_add(m,"mall01\toff");
+            else if( map->list[m].flag.mall01 )
+                map_zone_mf_cache_add(m,"mall01");
+        }
+    } 
+else if( !strcmpi(flag,"bat_a03")) {
+        if( state && map->list[m].flag.bat_a03 )
+            ; /* nothing to do */
+        else {
+            if( state )
+                map_zone_mf_cache_add(m,"bat_a03\toff");
+            else if( map->list[m].flag.bat_a03 )
+                map_zone_mf_cache_add(m,"bat_a03");
+        }
+    } else if( !strcmpi(flag,"bat_a04")) {
+        if( state && map->list[m].flag.bat_a04 )
+            ; /* nothing to do */
+        else {
+            if( state )
+                map_zone_mf_cache_add(m,"bat_a04\toff");
+            else if( map->list[m].flag.bat_a04 )
+                map_zone_mf_cache_add(m,"bat_a04");
+        }
+    } else if( !strcmpi(flag,"bat_a05")) {
+        if( state && map->list[m].flag.bat_a05 )
+            ; /* nothing to do */
+        else {
+            if( state )
+                map_zone_mf_cache_add(m,"bat_a05\toff");
+            else if( map->list[m].flag.bat_a05 )
+                map_zone_mf_cache_add(m,"bat_a05");
+        }
+    } else if( !strcmpi(flag,"bat_b03")) {
+        if( state && map->list[m].flag.bat_b03 )
+            ; /* nothing to do */
+        else {
+            if( state )
+                map_zone_mf_cache_add(m,"bat_b03\toff");
+            else if( map->list[m].flag.bat_b03 )
+                map_zone_mf_cache_add(m,"bat_b03");
+        }
+    } else if( !strcmpi(flag,"bat_b04")) {
+        if( state && map->list[m].flag.bat_b04 )
+            ; /* nothing to do */
+        else {
+            if( state )
+                map_zone_mf_cache_add(m,"bat_b04\toff");
+            else if( map->list[m].flag.bat_b04 )
+                map_zone_mf_cache_add(m,"bat_b04");
+        }
+    } else if( !strcmpi(flag,"bat_b05")) {
+        if( state && map->list[m].flag.bat_b05 )
+            ; /* nothing to do */
+        else {
+            if( state )
+                map_zone_mf_cache_add(m,"bat_b05\toff");
+            else if( map->list[m].flag.bat_b05 )
+                map_zone_mf_cache_add(m,"bat_b05");
+        }
+    } else if( !strcmpi(flag,"schg_cas06")) {
+        if( state && map->list[m].flag.schg_cas06 )
+            ; /* nothing to do */
+        else {
+            if( state )
+                map_zone_mf_cache_add(m,"schg_cas06\toff");
+            else if( map->list[m].flag.schg_cas06 )
+                map_zone_mf_cache_add(m,"schg_cas06");
+        }
+    } else if( !strcmpi(flag,"schg_cas07")) {
+        if( state && map->list[m].flag.schg_cas07 )
+            ; /* nothing to do */
+        else {
+            if( state )
+                map_zone_mf_cache_add(m,"schg_cas07\toff");
+            else if( map->list[m].flag.schg_cas07 )
+                map_zone_mf_cache_add(m,"schg_cas07");
+        }
+    } else if( !strcmpi(flag,"schg_cas08")) {
+        if( state && map->list[m].flag.schg_cas08 )
+            ; /* nothing to do */
+        else {
+            if( state )
+                map_zone_mf_cache_add(m,"schg_cas08\toff");
+            else if( map->list[m].flag.schg_cas08 )
+                map_zone_mf_cache_add(m,"schg_cas08");
+        }
+    } else if( !strcmpi(flag,"arug_cas06")) {
+        if( state && map->list[m].flag.arug_cas06 )
+            ; /* nothing to do */
+        else {
+            if( state )
+                map_zone_mf_cache_add(m,"arug_cas06\toff");
+            else if( map->list[m].flag.arug_cas06 )
+                map_zone_mf_cache_add(m,"arug_cas06");
+        }
+    } 
+else if( !strcmpi(flag,"arug_cas07")) {
+        if( state && map->list[m].flag.arug_cas07 )
+            ; /* nothing to do */
+        else {
+            if( state )
+                map_zone_mf_cache_add(m,"arug_cas07\toff");
+            else if( map->list[m].flag.schg_cas08 )
+                map_zone_mf_cache_add(m,"arug_cas07");
+        }
+    } 
+else if( !strcmpi(flag,"arug_cas08")) {
+        if( state && map->list[m].flag.arug_cas08 )
+            ; /* nothing to do */
+        else {
+            if( state )
+                map_zone_mf_cache_add(m,"arug_cas08\toff");
+            else if( map->list[m].flag.arug_cas08 )
+                map_zone_mf_cache_add(m,"arug_cas08");
+        }
+    } 
+else if( !strcmpi(flag,"rush_cas01")) {
+        if( state && map->list[m].flag.rush_cas01 )
+            ; /* nothing to do */
+        else {
+            if( state )
+                map_zone_mf_cache_add(m,"rush_cas01\toff");
+            else if( map->list[m].flag.rush_cas01 )
+                map_zone_mf_cache_add(m,"rush_cas01");
+        }
+    } 
+else if( !strcmpi(flag,"rush_cas02")) {
+        if( state && map->list[m].flag.rush_cas02 )
+            ; /* nothing to do */
+        else {
+            if( state )
+                map_zone_mf_cache_add(m,"rush_cas02\toff");
+            else if( map->list[m].flag.rush_cas02 )
+                map_zone_mf_cache_add(m,"rush_cas02");
+        }
+    } 
+else if( !strcmpi(flag,"rush_cas03")) {
+        if( state && map->list[m].flag.rush_cas03 )
+            ; /* nothing to do */
+        else {
+            if( state )
+                map_zone_mf_cache_add(m,"rush_cas03\toff");
+            else if( map->list[m].flag.rush_cas03 )
+                map_zone_mf_cache_add(m,"rush_cas03");
+        }
+    } 
+else if( !strcmpi(flag,"rush_cas04")) {
+        if( state && map->list[m].flag.rush_cas04 )
+            ; /* nothing to do */
+        else {
+            if( state )
+                map_zone_mf_cache_add(m,"rush_cas04\toff");
+            else if( map->list[m].flag.rush_cas04 )
+                map_zone_mf_cache_add(m,"rush_cas04");
+        }
+    } 
+else if( !strcmpi(flag,"region_8")) {
+        if( state && map->list[m].flag.region_8 )
+            ; /* nothing to do */
+        else {
+            if( state )
+                map_zone_mf_cache_add(m,"region_8\toff");
+            else if( map->list[m].flag.region_8 )
+                map_zone_mf_cache_add(m,"region_8");
+        }
+    } 
+else if( !strcmpi(flag,"bat_c04")) {
+        if( state && map->list[m].flag.bat_c04 )
+            ; /* nothing to do */
+        else {
+            if( state )
+                map_zone_mf_cache_add(m,"bat_c04\toff");
+            else if( map->list[m].flag.bat_c04 )
+                map_zone_mf_cache_add(m,"bat_c04");
+        }
+    } 
+else if( !strcmpi(flag,"bat_c05")) {
+        if( state && map->list[m].flag.bat_c05 )
+            ; /* nothing to do */
+        else {
+            if( state )
+                map_zone_mf_cache_add(m,"bat_c05\toff");
+            else if( map->list[m].flag.bat_c05 )
+                map_zone_mf_cache_add(m,"bat_c05");
+        }
+    } else if( !strcmpi(flag,"bat_c06")) {
+        if( state && map->list[m].flag.bat_c06 )
+            ; /* nothing to do */
+        else {
+            if( state )
+                map_zone_mf_cache_add(m,"bat_c06\toff");
+            else if( map->list[m].flag.bat_c06 )
+                map_zone_mf_cache_add(m,"bat_c06");
+        }
+    } 
+else if( !strcmpi(flag,"bat_c07")) {
+        if( state && map->list[m].flag.bat_c07 )
+            ; /* nothing to do */
+        else {
+            if( state )
+                map_zone_mf_cache_add(m,"bat_c07\toff");
+            else if( map->list[m].flag.bat_c07 )
+                map_zone_mf_cache_add(m,"bat_c07");
+        }
+    } 
+else if( !strcmpi(flag,"bat_c08")) {
+        if( state && map->list[m].flag.bat_c08 )
+            ; /* nothing to do */
+        else {
+            if( state )
+                map_zone_mf_cache_add(m,"bat_c08\toff");
+            else if( map->list[m].flag.bat_c08 )
+                map_zone_mf_cache_add(m,"bat_c08");
+        }
+    } 
+
+
+
 
 	return false;
 }

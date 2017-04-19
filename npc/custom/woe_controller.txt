@@ -17,7 +17,7 @@
 
 // Information NPC
 //============================================================
-prontera,149,193,4	script	WOE Information	2_BOARD1,{
+prontera,150,191,4	script	Informations WoE	4_M_RUSKING,{
 	doevent "WOE_CONTROL::OnMenu";
 	end;
 OnAgitStart:
@@ -41,8 +41,8 @@ OnInit:
 
 	set .CastleWarp,0;		// 1: Always enable all castle warps. | 0: Warp only to active castles.
 	set .AutoKick,1;		// Automatically kick players from inactive castles during WOE? (1:yes / 0:no)
-	set .NoOwner,0; 		// Automatically kick players from unconquered castles outside of WOE? (1:yes / 0:no)
-	set .ExitWarp,0;		// Warp all players from castles when WOE ends? (1:yes / 0:no)
+	set .NoOwner,1; 		// Automatically kick players from unconquered castles outside of WOE? (1:yes / 0:no)
+	set .ExitWarp,1;		// Warp all players from castles when WOE ends? (1:yes / 0:no)
 	set .GMAccess,99;		// GM level required to access Session Manager.
 
 // -----------------------------------------------------------
@@ -62,7 +62,7 @@ OnInit:
 // -----------------------------------------------------------
 
 	// Combine values as needed (e.g. 1|8 = 1+8 = 9).
-	set .Options, 1|8;
+	set .Options, 4;
 
 	// Rewards per castle.
 	// -- when given directly: <itemID>,<amount>{,<itemID>,<amount>,...}
@@ -104,7 +104,7 @@ OnMinute00:
 		for(set .@i,0; .@i<.Size; set .@i,.@i+4)
 			if (gettime(GETTIME_WEEKDAY) == $WOE_CONTROL[.@i] && gettime(GETTIME_HOUR) == $WOE_CONTROL[.@i+2]) {
 			OnWOEEnd:
-				announce "The War Of Emperium is over!",bc_all|bc_woe;
+				announce "La WoE est finie !",bc_all|bc_woe;
 				agitend; agitend2;
 				sleep 1000;
 				for(set .@j,0; .@j<30; set .@j,.@j+1) {
@@ -124,7 +124,7 @@ OnMinute00:
 				deletearray .Active[0],2;
 				set .Active[0], $WOE_CONTROL[.@i+3];
 				if (.Init) { agitend; agitend2; }
-				else announce "The War Of Emperium has begun!",bc_all|bc_woe;
+				else announce "La WoE Commence !",bc_all|bc_woe;
 				sleep 1000;
 				agitstart; agitstart2;
 				for(set .@j,0; .@j<30; set .@j,.@j+1) {
@@ -149,8 +149,8 @@ OnMinute00:
 
 function Disp_Owner {
 	set .@o, getcastledata(getarg(0),1);
-	if (.@o) announce "The ["+getcastlename(getarg(0))+"] castle "+((getarg(1))?"has been conquered":"is currently held")+" by the ["+getguildname(.@o)+"] guild.",bc_all|bc_woe;
-	else announce "The ["+getcastlename(getarg(0))+"] castle is currently unoccupied.",bc_all|bc_woe;
+	if (.@o) announce "Le Chateau ["+getcastlename(getarg(0))+"]"+((getarg(1))?" a ete conquis ":" est tenu ")+"par la guilde ["+getguildname(.@o)+"].",bc_all|bc_woe;
+	else announce "Le chateau ["+getcastlename(getarg(0))+"] est inoccuppe.",bc_all|bc_woe;
 	return;
 }
 function Add_Zero {
@@ -175,7 +175,7 @@ OnReward:
 				if (.Options&2) {
 					query_sql("INSERT INTO `mail` (send_name,dest_id,title,message,nameid,amount,identify,zeny,time) VALUES ("+
 					          "'no-reply',"+.@cid[.@j]+",'** Siege Reward: "+getcastlename(.Castles$[.@i])+" **',"+
-					          "'Brave one,% % Congratulations!% Your guild has successfully occupied% territory in the War of Emperium on% "+.@str$+".% % % % % [ Your reward is attached. ]',"+
+					          "'Brave one,% % Felicitations!% Votre guilde possede un chateau% % a la fin de la WoE !"+.@str$+".% % % % % [ Voici votre recompense. ]',"+
 					          .Reward[0]+","+.Reward[1]+",0,"+.Reward[2]+",UNIX_TIMESTAMP(NOW()))");
 					if (!getd(".@str_"+.@cid[.@j]) && isloggedin(.@aid[.@j],.@cid[.@j])) {
 						setd ".@str_"+.@cid[.@j],1;
@@ -184,7 +184,7 @@ OnReward:
 				} else if (isloggedin(.@aid[.@j])) {
 					for(set .@k,0; .@k<getarraysize(.Reward); set .@k,.@k+2)
 						getitem .Reward[.@k], .Reward[.@k+1], .@aid[.@j];
-					message rid2name(.@aid[.@j]),"You have been rewarded for conquering "+getcastlename(.Castles$[.@i])+".";
+					message rid2name(.@aid[.@j]),"Vous avez ete recompense pour le chateau "+getcastlename(.Castles$[.@i])+".";
 				}
 			}
 		}
@@ -204,7 +204,7 @@ OnPCLoadMapEvent:
 
 OnMenu:
 while(1) {
-	mes "[WOE Information]";
+	mes "[Informations WoE]";
 	if (agitcheck() || agitcheck2()) {
 		if (.Active[0]) {
 			for(set .@i,0; .@i<.Size; set .@i,.@i+4)
@@ -212,12 +212,12 @@ while(1) {
 					set .@i, $WOE_CONTROL[.@i+2];
 					break;
 				}
-			mes "The War of Emperium is ^0055FFactive^000000 until ^FF0000"+Add_Zero(.@i)+"^000000 in the following regions:";
+			mes "La WoE est ^0055FFactive^000000 jusqu'a ^FF0000"+Add_Zero(.@i)+"^000000 dans les regions suivantes:";
 			mes " ";
 			for(set .@i,0; .@i<6; set .@i,.@i+1)
 				if (.Active[1]&(1<<(.@i+1))) mes " > ^777777"+.Regions$[.@i]+"^000000";
 		} else
-			mes "The War of Emperium is ^0055FFactive^000000.";
+			mes "La WoE est ^0055FFactive^000000.";
 	} else {
 		for(set .@i,0; .@i<.Size; set .@i,.@i+4)
 			if ((gettime(GETTIME_WEEKDAY) == $WOE_CONTROL[.@i] && gettime(GETTIME_HOUR) <= $WOE_CONTROL[.@i+1]) || gettime(GETTIME_WEEKDAY) < $WOE_CONTROL[.@i]) {
@@ -226,15 +226,15 @@ while(1) {
 			}
 		if (!getarraysize(.@time))
 			setarray .@time[0],$WOE_CONTROL[0],$WOE_CONTROL[1];
-		mes "The War of Emperium is ^777777inactive^000000.";
+		mes "La WoE est ^777777inactive^000000.";
 		if (.Size) {
 			mes " ";
-			mes "The next session will begin";
-			mes "on ^0055FF"+.Days$[.@time[0]]+"^000000 at "+Add_Zero(.@time[1])+"^000000.";
+			mes "La prochaine session commence";
+			mes "^0055FF"+.Days$[.@time[0]]+"^000000 a "+Add_Zero(.@time[1])+"^000000.";
 		}
 	}
 	next;
-	switch(select(((.CastleWarp || .Active[1])?" ~ Warp to castles...":""), "~ Check schedule...", " ~ View castle owners...", ((getgmlevel()<.GMAccess || !getgmlevel())?"":" ~ Manage sessions..."), " ~ ^777777Cancel^000000")) {
+	switch(select(((.CastleWarp || .Active[1])?" ~ Warp aux chateaux...":""), " ~ Regarder le planning...", " ~ Voir les proprietaires...", ((getgmlevel()<.GMAccess || !getgmlevel())?"":" ~ Manage sessions..."), " ~ ^777777Cancel^000000")) {
 	case 1:
 		if (.CastleWarp) set .@clr$,"^0055FF";
 		set .@menu$,"";
@@ -254,7 +254,7 @@ while(1) {
 		warp .Map$[.@i],.MapX[(.@i*5)+.@j],.MapY[(.@i*5)+.@j];
 		close;
 	case 2:
-		mes "[Schedule]";
+		mes "[Planning]";
 		if (.Size) {
 			freeloop(1);
 			for(set .@i,0; .@i<.Size; set .@i,.@i+4) {
@@ -265,17 +265,17 @@ while(1) {
 			}
 			freeloop(0);
 		} else
-			mes "No times are configured.";
+			mes "Le planning n'est pas encore configure.";
 		next;
 		break;
 	case 3:
-		mes "[Castle Ownership]";
+		mes "[Proprietaire des chateaux]";
 		for(set .@i,0; .@i<6; set .@i,.@i+1) {
 			set .@k, .@i*5;
 			mes "> ^FF0000"+.Regions$[.@i]+"^000000";
 			for(set .@j,.@k; .@j<(.@k+5); set .@j,.@j+1) {
 				set .@t, getcastledata(.Castles$[.@j],1);
-				mes "  ~ "+getcastlename(.Castles$[.@j])+": "+((.@t)?"^0055FF"+getguildname(.@t):"^777777unoccupied")+"^000000";
+				mes "  ~ "+getcastlename(.Castles$[.@j])+": "+((.@t)?"^0055FF"+getguildname(.@t):"^777777Non conquis.")+"^000000";
 			}
 			if (.@i < 5) mes " ";
 		}

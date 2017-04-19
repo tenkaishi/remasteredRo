@@ -4916,6 +4916,53 @@ int pc_isUseitem(struct map_session_data *sd,int n)
 			if( !map->list[sd->bl.m].flag.reset )
 				return 0;
 			break;
+
+			case ITEMID_WOESLIMPOT:
+		case ITEMID_WOEBLUEPOT:
+		case ITEMID_WOEWHITEPOT:
+		case ITEMID_WOESPEEDPOT:
+		case ITEMID_WOEBOXGLOOM:
+		case ITEMID_WOEBOXRESENTMENT:
+		case ITEMID_WOEBOXDROWSINESS:
+		case ITEMID_WOEFIREPROOF:
+		case ITEMID_WOECOLDPROOF:
+		case ITEMID_WOEEARTHPROOF:
+		case ITEMID_WOETHUNDERPROOF:
+		case ITEMID_WOESUNLIGHTBOX:
+		case ITEMID_WOESTRFOOD:
+		case ITEMID_WOEAGIFOOD:
+		case ITEMID_WOEVITFOOD:
+		case ITEMID_WOEINTFOOD:
+		case ITEMID_WOEDEXFOOD:
+		case ITEMID_WOELUKFOOD:
+		case ITEMID_WOEABRASIVE:
+		case ITEMID_WOEEDP:
+			if( !map->list[sd->bl.m].flag.gvg)
+				return 0;
+			break;
+		case ITEMID_BGSLIMPOT:
+		case ITEMID_BGBLUEPOT:
+		case ITEMID_BGWHITEPOT:
+		case ITEMID_BGSPEEDPOT:
+		case ITEMID_BGBOXGLOOM:
+		case ITEMID_BGBOXRESENTMENT:
+		case ITEMID_BGBOXDROWSINESS:
+		case ITEMID_BGFIREPROOF:
+		case ITEMID_BGCOLDPROOF:
+		case ITEMID_BGEARTHPROOF:
+		case ITEMID_BGTHUNDERPROOF:
+		case ITEMID_BGSUNLIGHTBOX:
+		case ITEMID_BGABRASIVE:
+		case ITEMID_BGEDP:		
+		case ITEMID_BGSTRFOOD:
+		case ITEMID_BGAGIFOOD:
+		case ITEMID_BGVITFOOD:
+		case ITEMID_BGINTFOOD:
+		case ITEMID_BGDEXFOOD:
+		case ITEMID_BGLUKFOOD:
+			if( !map->list[sd->bl.m].flag.battleground)
+				return 0;
+			break;
 	}
 
 	if( nameid >= ITEMID_BOW_MERCENARY_SCROLL1 && nameid <= ITEMID_SPEARMERCENARY_SCROLL10 && sd->md != NULL ) // Mercenary Scrolls

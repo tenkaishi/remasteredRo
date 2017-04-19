@@ -63,11 +63,11 @@
 // 20120307 - 2012-03-07aRagexeRE+ - 0x970
 
 #ifndef PACKETVER
-	#define PACKETVER 20141022
+	#define PACKETVER 20151104
 #endif // PACKETVER
 
 //Uncomment the following line if your client is ragexeRE instead of ragexe (required because of conflicting packets in ragexe vs ragexeRE).
-//#define ENABLE_PACKETVER_RE
+#define ENABLE_PACKETVER_RE 20151104
 #ifdef ENABLE_PACKETVER_RE
 	#define PACKETVER_RE
 	#undef ENABLE_PACKETVER_RE

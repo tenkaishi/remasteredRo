@@ -838,6 +838,8 @@ const char* parse_callfunc(const char* p, int require_paren, int is_custom)
 			script->syntax.last_func = script->str_data[func].val;
 			script->addl(func);
 			script->addc(C_ARG);
+
+
 		}
 
 		arg = script->buildin[script->str_data[func].val];
@@ -5826,6 +5828,148 @@ bool script_sprintf(struct script_state *st, int start, struct StringBuf *out)
 //-----------------------------------------------------------------------------
 // buildin functions
 //
+
+int viewpointmap_sub(struct block_list *bl, va_list ap)
+{
+	struct map_session_data *sd;
+	int npc_id, type, x, y, id, color;
+	npc_id = va_arg(ap,int);
+	type = va_arg(ap,int);
+	x = va_arg(ap,int);
+	y = va_arg(ap,int);
+	id = va_arg(ap,int);
+	color = va_arg(ap,int);
+	sd = (struct map_session_data *)bl;
+	clif->viewpoint(sd,npc_id,type,x,y,id,color);
+	return true;
+}
+
+BUILDIN(viewpointmap)
+{
+	int type,x,y,id,color,m;
+	const char *map_name;
+
+	map_name = script_getstr(st,2);
+	if( (m = map->mapname2mapid(map_name)) < 0 )
+		return false; // Invalid Map
+
+	type=script_getnum(st,3);
+	x=script_getnum(st,4);
+	y=script_getnum(st,5);
+	id=script_getnum(st,6);
+	color=script_getnum(st,7);
+
+	map->foreachinmap(viewpointmap_sub,m,BL_PC,st->oid,type,x,y,id,color);
+	return true;
+}
+
+BUILDIN(flooritem)
+{
+	struct map_session_data *sd = script_rid2sd(st);
+	struct item_data *item_data;
+	int nameid, amount;
+
+	if( sd == NULL ) return 0;
+
+	nameid = script_getnum(st,2);
+	if( (item_data = itemdb->search(nameid)) == NULL )
+		return 0;
+
+	amount = script_getnum(st,3);
+	if( amount <= 0 )
+		return 0;
+
+	map->addflooritem_area(&sd->bl, 0, 0, 0, nameid, amount);
+	return 0;
+}
+
+BUILDIN(flooritem2xy)
+{
+	struct item_data *item_data;
+	int nameid, amount, m, x, y;
+	const char *mapname;
+
+	mapname = script_getstr(st,2);
+	if( (m = map->mapname2mapid(mapname)) < 0 )
+		return 0;
+
+	x = script_getnum(st,3);
+	y = script_getnum(st,4);
+	nameid = script_getnum(st,5);
+	if( (item_data = itemdb->search(nameid)) == NULL )
+		return 0;
+
+	amount = script_getnum(st,6);
+	if( amount < 1 )
+		return 0;
+
+	map->addflooritem_area(NULL, m, x, y, nameid, amount);
+	return 0;
+}
+
+BUILDIN(bg_getitem)
+{
+	int bg_id, nameid, amount;
+
+	bg_id = script_getnum(st,2);
+	nameid = script_getnum(st,3);
+	amount = script_getnum(st,4);
+
+	bg->team_getitem(bg_id, nameid, amount);
+	return 0;
+}
+
+BUILDIN(bg_getkafrapoints)
+{
+	int bg_id, amount;
+
+	bg_id = script_getnum(st,2);
+	amount = script_getnum(st,3);
+
+	bg->team_get_kafrapoints(bg_id, amount);
+	return 0;
+}
+
+BUILDIN(bg_single) {
+	const char* map_name;
+	struct map_session_data *sd;
+	int x, y, map_index, bg_id;
+
+	sd = script->rid2sd(st);
+	if( sd == NULL )
+		return true;
+	
+	bg_id = script_getnum(st,2);
+	map_name = script_getstr(st,3);
+	if( (map_index = script->mapindexname2id(st,map_name)) == 0 )
+		return true;
+
+	x = script_getnum(st,4);
+	y = script_getnum(st,5);
+	
+	if( bg->team_join(bg_id, sd) )
+	{
+		pc->setpos(sd, map_index, x, y, CLR_TELEPORT);
+		script_pushint(st,1);
+	}
+	else
+		script_pushint(st,0);
+
+	return true;
+}
+
+BUILDIN(bg_team_reveal)
+{
+	struct battleground_data *bgd;
+	int bg_id;
+
+	bg_id = script_getnum(st,2);
+	if( (bgd = bg->team_search(bg_id)) == NULL )
+		return false;
+
+	bgd->reveal_pos_sub = 1; // Reveal Position Mode
+	return true;
+}
 
 /////////////////////////////////////////////////////////////////////
 // NPC interaction
@@ -12738,6 +12882,29 @@ BUILDIN(getmapflag)
 			case MF_NOCHAT:             script_pushint(st,map->list[m].flag.nochat); break;
 			case MF_NOEXPPENALTY:       script_pushint(st,map->list[m].flag.noexppenalty ); break;
 			case MF_GUILDLOCK:          script_pushint(st,map->list[m].flag.guildlock); break;
+			case MF_MALL01:				script_pushint(st,map->list[m].flag.mall01); break;
+			case MF_bat_a03:	script_pushint(st,map->list[m].flag.bat_a03); break;
+			case MF_bat_a04:	script_pushint(st,map->list[m].flag.bat_a04); break;
+			case MF_bat_a05:	script_pushint(st,map->list[m].flag.bat_a05); break;
+			case MF_bat_b03:	script_pushint(st,map->list[m].flag.bat_b03); break;
+			case MF_bat_b04:	script_pushint(st,map->list[m].flag.bat_b04); break;
+			case MF_bat_b05:	script_pushint(st,map->list[m].flag.bat_b05); break;
+			case MF_schg_cas06:	script_pushint(st,map->list[m].flag.schg_cas06); break;
+			case MF_schg_cas07:	script_pushint(st,map->list[m].flag.schg_cas07); break;
+			case MF_schg_cas08:	script_pushint(st,map->list[m].flag.schg_cas08); break;
+			case MF_arug_cas06:	script_pushint(st,map->list[m].flag.arug_cas06); break;
+			case MF_arug_cas07:	script_pushint(st,map->list[m].flag.arug_cas07); break;
+			case MF_arug_cas08:	script_pushint(st,map->list[m].flag.arug_cas08); break;
+			case MF_rush_cas01:	script_pushint(st,map->list[m].flag.rush_cas01); break;
+			case MF_rush_cas02:	script_pushint(st,map->list[m].flag.rush_cas02); break;
+			case MF_rush_cas03:	script_pushint(st,map->list[m].flag.rush_cas03); break;
+			case MF_rush_cas04:	script_pushint(st,map->list[m].flag.rush_cas04); break;
+			case MF_bat_c04:	script_pushint(st,map->list[m].flag.bat_c04); break;
+			case MF_bat_c05:	script_pushint(st,map->list[m].flag.bat_c05); break;
+			case MF_bat_c06:	script_pushint(st,map->list[m].flag.bat_c06); break;
+			case MF_bat_c07:	script_pushint(st,map->list[m].flag.bat_c07); break;
+			case MF_bat_c08:	script_pushint(st,map->list[m].flag.bat_c08); break;
+			case MF_region_8:	script_pushint(st,map->list[m].flag.region_8); break;
 			case MF_TOWN:               script_pushint(st,map->list[m].flag.town); break;
 			case MF_AUTOTRADE:          script_pushint(st,map->list[m].flag.autotrade); break;
 			case MF_ALLOWKS:            script_pushint(st,map->list[m].flag.allowks); break;
@@ -12862,6 +13029,29 @@ BUILDIN(setmapflag) {
 			case MF_NOCHAT:             map->list[m].flag.nochat = 1; break;
 			case MF_NOEXPPENALTY:       map->list[m].flag.noexppenalty  = 1; break;
 			case MF_GUILDLOCK:          map->list[m].flag.guildlock = 1; break;
+			case MF_MALL01:				map->list[m].flag.mall01=1; break;
+			case MF_bat_a03:	map->list[m].flag.bat_a03 = 1; break;
+			case MF_bat_a04:	map->list[m].flag.bat_a04 = 1; break;
+			case MF_bat_a05:	map->list[m].flag.bat_a05 = 1; break;
+			case MF_bat_b03:	map->list[m].flag.bat_b03 = 1; break;
+			case MF_bat_b04:	map->list[m].flag.bat_b04 = 1; break;
+			case MF_bat_b05:	map->list[m].flag.bat_b05 = 1; break;
+			case MF_schg_cas06:	map->list[m].flag.schg_cas06 = 1; break;
+			case MF_schg_cas07:	map->list[m].flag.schg_cas07 = 1; break;
+			case MF_schg_cas08:	map->list[m].flag.schg_cas08 = 1; break;
+			case MF_arug_cas06:	map->list[m].flag.arug_cas06 = 1; break;
+			case MF_arug_cas07:	map->list[m].flag.arug_cas07 = 1; break;
+			case MF_arug_cas08:	map->list[m].flag.arug_cas08 = 1; break;
+			case MF_rush_cas01:	map->list[m].flag.rush_cas01 = 1; break;
+			case MF_rush_cas02:	map->list[m].flag.rush_cas02 = 1; break;
+			case MF_rush_cas03:	map->list[m].flag.rush_cas03 = 1; break;
+			case MF_rush_cas04:	map->list[m].flag.rush_cas04 = 1; break;
+			case MF_bat_c04:	map->list[m].flag.bat_c04 = 1; break;
+			case MF_bat_c05:	map->list[m].flag.bat_c05 = 1; break;
+			case MF_bat_c06:	map->list[m].flag.bat_c06 = 1; break;
+			case MF_bat_c07:	map->list[m].flag.bat_c07 = 1; break;
+			case MF_bat_c08:	map->list[m].flag.bat_c08 = 1; break;
+			case MF_region_8:	map->list[m].flag.region_8 = 1; break;
 			case MF_TOWN:               map->list[m].flag.town = 1; break;
 			case MF_AUTOTRADE:          map->list[m].flag.autotrade = 1; break;
 			case MF_ALLOWKS:            map->list[m].flag.allowks = 1; break;
@@ -12949,6 +13139,29 @@ BUILDIN(removemapflag) {
 			case MF_NOCHAT:             map->list[m].flag.nochat = 0; break;
 			case MF_NOEXPPENALTY:       map->list[m].flag.noexppenalty  = 0; break;
 			case MF_GUILDLOCK:          map->list[m].flag.guildlock = 0; break;
+			case MF_MALL01:				map->list[m].flag.mall01=0; break;
+			case MF_bat_a03:	map->list[m].flag.bat_a03 = 0; break;
+			case MF_bat_a04:	map->list[m].flag.bat_a04 = 0; break;
+			case MF_bat_a05:	map->list[m].flag.bat_a05 = 0; break;
+			case MF_bat_b03:	map->list[m].flag.bat_b03 = 0; break;
+			case MF_bat_b04:	map->list[m].flag.bat_b04 = 0; break;
+			case MF_bat_b05:	map->list[m].flag.bat_b05 = 0; break;
+			case MF_schg_cas06:	map->list[m].flag.schg_cas06 = 0; break;
+			case MF_schg_cas07:	map->list[m].flag.schg_cas07 = 0; break;
+			case MF_schg_cas08:	map->list[m].flag.schg_cas08 = 0; break;
+			case MF_arug_cas06:	map->list[m].flag.arug_cas06 = 0; break;
+			case MF_arug_cas07:	map->list[m].flag.arug_cas07 = 0; break;
+			case MF_arug_cas08:	map->list[m].flag.arug_cas08 = 0; break;
+			case MF_rush_cas01:	map->list[m].flag.rush_cas01 = 0; break;
+			case MF_rush_cas02:	map->list[m].flag.rush_cas02 = 0; break;
+			case MF_rush_cas03:	map->list[m].flag.rush_cas03 = 0; break;
+			case MF_rush_cas04:	map->list[m].flag.rush_cas04 = 0; break;
+			case MF_bat_c04:	map->list[m].flag.bat_c04 = 0; break;
+			case MF_bat_c05:	map->list[m].flag.bat_c05 = 0; break;
+			case MF_bat_c06:	map->list[m].flag.bat_c06 = 0; break;
+			case MF_bat_c07:	map->list[m].flag.bat_c07 = 0; break;
+			case MF_bat_c08:	map->list[m].flag.bat_c08 = 0; break;
+			case MF_region_8:	map->list[m].flag.region_8 = 0; break;
 			case MF_TOWN:               map->list[m].flag.town = 0; break;
 			case MF_AUTOTRADE:          map->list[m].flag.autotrade = 0; break;
 			case MF_ALLOWKS:            map->list[m].flag.allowks = 0; break;
@@ -20718,7 +20931,7 @@ BUILDIN(packageitem) {
 /* bg_team_create(map_name,respawn_x,respawn_y) */
 /* returns created team id or -1 when fails */
 BUILDIN(bg_create_team) {
-	const char *map_name, *ev = "", *dev = "";//ev and dev will be dropped.
+	const char *map_name, *ev = "", *dev = "";
 	int x, y, map_index = 0, bg_id;
 
 	map_name = script_getstr(st,2);
@@ -20732,7 +20945,9 @@ BUILDIN(bg_create_team) {
 
 	x = script_getnum(st,3);
 	y = script_getnum(st,4);
-
+	ev = script_getstr(st,5); // Logout Event [kubix]
+	dev = script_getstr(st,6); // Die Event [kubix]
+	
 	if( (bg_id = bg->create(map_index, x, y, ev, dev)) == 0 ) { // Creation failed
 		script_pushint(st,-1);
 	} else
@@ -20741,6 +20956,26 @@ BUILDIN(bg_create_team) {
 	return true;
 
 }
+
+BUILDIN(bg_reward)
+{
+	int bg_id, nameid, amount, kafrapoints, quest_id, add_value, bg_arena, bg_result;
+	const char *var;
+
+	bg_id = script_getnum(st,2);
+	nameid = script_getnum(st,3);
+	amount = script_getnum(st,4);
+	kafrapoints = script_getnum(st,5);
+	quest_id = script_getnum(st,6);
+	var = script_getstr(st,7);
+	add_value = script_getnum(st,8);
+	bg_arena = script_getnum(st,9);
+	bg_result = script_getnum(st,10);
+
+	bg->team_rewards(bg_id, nameid, amount, kafrapoints, quest_id, var, add_value, bg_arena, bg_result);
+	return true;
+}
+
 /* bg_join_team(team_id{,optional account id}) */
 /* when account id is not present it tries to autodetect from the attached player (if any) */
 /* returns 0 when successful, 1 otherwise */
@@ -21499,6 +21734,14 @@ void script_run_item_unequip_script(struct map_session_data *sd, struct item_dat
 #define BUILDIN_DEF2_DEPRECATED(x,x2,args) { buildin_ ## x , x2 , args, true }
 void script_parse_builtin(void) {
 	struct script_function BUILDIN[] = {
+
+		BUILDIN_DEF(bg_reward,"iiiiisiii"),
+		BUILDIN_DEF(bg_team_reveal,"i"),
+		BUILDIN_DEF(flooritem,"ii"),
+		BUILDIN_DEF(flooritem2xy,"siiii"),
+		BUILDIN_DEF(bg_getitem,"iii"),
+		BUILDIN_DEF(bg_getkafrapoints,"ii"),
+		BUILDIN_DEF(bg_single,"isii"),
 		/* Commands for internal use by the script engine */
 		BUILDIN_DEF(__jump_zero,"il"),
 		BUILDIN_DEF(__setr,"rv?"),
@@ -22010,7 +22253,7 @@ void script_parse_builtin(void) {
 		BUILDIN_DEF(montransform, "vi?????"), // Monster Transform [malufett/Hercules]
 
 		/* New BG Commands [Hercules] */
-		BUILDIN_DEF(bg_create_team,"sii"),
+		BUILDIN_DEF(bg_create_team,"siiss"),
 		BUILDIN_DEF(bg_join_team,"i?"),
 		BUILDIN_DEF(bg_match_over,"s?"),
 

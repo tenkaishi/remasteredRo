@@ -846,6 +846,29 @@ struct map_data {
 		unsigned partylock :1;
 		unsigned guildlock :1;
 		unsigned src4instance : 1; // To flag this map when it's used as a src map for instances
+		unsigned mall01 : 1;
+		unsigned bat_a03 : 1;
+		unsigned bat_a04 : 1;
+		unsigned bat_a05 : 1;
+		unsigned bat_b03 : 1;
+		unsigned bat_b04 : 1;
+		unsigned bat_b05 : 1;
+		unsigned schg_cas06 : 1;
+		unsigned schg_cas07 : 1;
+		unsigned schg_cas08 : 1;
+		unsigned arug_cas06 : 1;
+		unsigned arug_cas07 : 1;
+		unsigned arug_cas08 : 1;
+		unsigned rush_cas01 : 1;
+		unsigned rush_cas02 : 1;
+		unsigned rush_cas03 : 1;
+		unsigned rush_cas04 : 1;
+		unsigned bat_c04 : 1;
+		unsigned bat_c05 : 1;
+		unsigned bat_c06 : 1;
+		unsigned bat_c07 : 1;
+		unsigned bat_c08 : 1;
+		unsigned region_8 : 1;
 		unsigned reset :1; // [Daegaladh]
 		unsigned chsysnolocalaj : 1;
 		unsigned noknockback : 1;
@@ -1207,6 +1230,8 @@ END_ZEROED_BLOCK;
 	int (*removemobs_timer) (int tid, int64 tick, int id, intptr_t data);
 	void (*clearflooritem) (struct block_list* bl);
 	int (*addflooritem) (const struct block_list *bl, struct item *item_data, int amount, int16 m, int16 x, int16 y, int first_charid, int second_charid, int third_charid, int flags);
+	int (*addflooritem_area)(const struct block_list* bl, int m, int x, int y, int nameid, int amount); // [Kubix]
+	
 	// player to map session
 	void (*addnickdb) (int charid, const char* nick);
 	void (*delnickdb) (int charid, const char* nick);

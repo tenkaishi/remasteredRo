@@ -252,6 +252,7 @@
     <ClInclude Include="..\src\login\lclif.p.h">
       <Filter>login</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\common\conf.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="common">

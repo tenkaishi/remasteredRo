@@ -956,29 +956,29 @@ OnInit:
 }
 
 //== Cooking Addition ======================================
-prontera,156,212,1	trader	Chef Assistant#prt	8_F_GIRL,{
-OnInit:
-	sellitem Combination_Kit;
-	sellitem Mushroom;
-	sellitem Pot;
-	sellitem Bread;
-	sellitem Grain;
-	sellitem Cooking_Oil;
-	sellitem Plain_Sauce;
-	sellitem Hot_Sauce;
-	sellitem Sweet_Sauce;
-	sellitem Red_Spice;
-	sellitem Yellow_Spice;
-	sellitem Delicious_Fish;
-	sellitem Outdoor_Cooking_Kits;
-	sellitem Indoor_Cooking_Kits;
-	sellitem High_end_Cooking_Kits;
-	sellitem Cookbook01;
-	sellitem Cookbook02;
-	sellitem Cookbook03;
-	sellitem Cookbook04;
-	sellitem Cookbook05;
-}
+//prontera,139,225,5	trader	Chef Assistant#prt	8_F_GIRL,{
+//OnInit:
+//	sellitem Combination_Kit;
+//	sellitem Mushroom;
+//	sellitem Pot;
+//	sellitem Bread;
+//	sellitem Grain;
+//	sellitem Cooking_Oil;
+//	sellitem Plain_Sauce;
+//	sellitem Hot_Sauce;
+//	sellitem Sweet_Sauce;
+//	sellitem Red_Spice;
+//	sellitem Yellow_Spice;
+//	sellitem Delicious_Fish;
+//	sellitem Outdoor_Cooking_Kits;
+//	sellitem Indoor_Cooking_Kits;
+//	sellitem High_end_Cooking_Kits;
+//	sellitem Cookbook01;
+//	sellitem Cookbook02;
+//	sellitem Cookbook03;
+//	sellitem Cookbook04;
+//	sellitem Cookbook05;
+//}
 
 moc_ruins,115,123,5	trader	Chef Assistant#moc	4_M_04,{
 OnInit:

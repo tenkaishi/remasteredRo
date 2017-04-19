@@ -1,4 +1,4 @@
-/**
+﻿/**
  * This file is part of Hercules.
  * http://herc.ws - http://github.com/HerculesWS/Hercules
  *
@@ -2327,15 +2327,44 @@ int skill_attack(int attack_type, struct block_list* src, struct block_list *dsr
 			/* bugreport:7859 magical reflected zeroes blow count */
 			dmg.blewcount = 0;
 			//Spirit of Wizard blocks Kaite's reflection
+			//Spirit of Wizard blocks Kaite's reflection
 			if (reflecttype == 2 && sc && sc->data[SC_SOULLINK] && sc->data[SC_SOULLINK]->val2 == SL_WIZARD) {
-				//Consume one Fragment per hit of the casted skill? [Skotlex]
-				int consumeitem = tsd ? pc->search_inventory(tsd, ITEMID_FRAGMENT_OF_CRYSTAL) : 0;
-				if (consumeitem != INDEX_NOT_FOUND) {
-					if ( tsd ) pc->delitem(tsd, consumeitem, 1, 0, DELITEM_SKILLUSE, LOG_TYPE_CONSUME);
-					dmg.damage = dmg.damage2 = 0;
-					dmg.dmg_lv = ATK_MISS;
-					sc->data[SC_SOULLINK]->val3 = skill_id;
-					sc->data[SC_SOULLINK]->val4 = dsrc->id;
+				//Consume one Fragment per hit of the casted skill? [Skotlex+Kubix]
+				if (map->list[sd->bl.m].flag.gvg)
+				{
+					int consumeitem = tsd ? pc->search_inventory(tsd, ITEMID_WOECRYSTALFRAGMENT) : 0;
+					if (consumeitem != INDEX_NOT_FOUND)
+					{
+						if ( tsd ) pc->delitem(tsd, consumeitem, 1, 0, DELITEM_SKILLUSE, LOG_TYPE_CONSUME);
+						dmg.damage = dmg.damage2 = 0;
+						dmg.dmg_lv = ATK_MISS;
+						sc->data[SC_SOULLINK]->val3 = skill_id;
+						sc->data[SC_SOULLINK]->val4 = dsrc->id;
+					}
+				}
+				else if (map->list[sd->bl.m].flag.battleground)
+				{
+					int consumeitem = tsd ? pc->search_inventory(tsd, ITEMID_BGCRYSTALFRAGMENT) : 0;
+					if (consumeitem != INDEX_NOT_FOUND)
+					{
+						if ( tsd ) pc->delitem(tsd, consumeitem, 1, 0, DELITEM_SKILLUSE, LOG_TYPE_CONSUME);
+						dmg.damage = dmg.damage2 = 0;
+						dmg.dmg_lv = ATK_MISS;
+						sc->data[SC_SOULLINK]->val3 = skill_id;
+						sc->data[SC_SOULLINK]->val4 = dsrc->id;
+					}
+				}
+				else 
+				{
+					int consumeitem = tsd ? pc->search_inventory(tsd, ITEMID_FRAGMENT_OF_CRYSTAL) : 0;
+					if (consumeitem != INDEX_NOT_FOUND)
+					{
+						if ( tsd ) pc->delitem(tsd, consumeitem, 1, 0, DELITEM_SKILLUSE, LOG_TYPE_CONSUME);
+						dmg.damage = dmg.damage2 = 0;
+						dmg.dmg_lv = ATK_MISS;
+						sc->data[SC_SOULLINK]->val3 = skill_id;
+						sc->data[SC_SOULLINK]->val4 = dsrc->id;
+					}
 				}
 			} else if( reflecttype != 2 ) /* Kaite bypasses */
 				additional_effects = false;
@@ -7032,11 +7061,13 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 		}
 
 		case AM_BERSERKPITCHER:
+		// read the  new_item_mode.с first!
+
 		case AM_POTIONPITCHER:
 			{
 				int i,sp = 0;
 				int64 hp = 0;
-				if (dstmd && dstmd->class_ == MOBID_EMPELIUM) {
+				if( dstmd && dstmd->class_ == MOBID_EMPELIUM ) {
 					map->freeblock_unlock();
 					return 1;
 				}
@@ -7044,7 +7075,33 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 					int x,bonus=100, potion = min(500+skill_lv,505);
 					x = skill_lv%11 - 1;
 					i = pc->search_inventory(sd,skill->dbs->db[skill_id].itemid[x]);
-					if (i == INDEX_NOT_FOUND || skill->dbs->db[skill_id].itemid[x] <= 0) {
+					int needed = skill->dbs->db[skill_id].itemid[x];
+					int id = INDEX_NOT_FOUND;
+					
+					if(needed == ITEMID_WHITE_POTION)
+					{
+						if (map->list[sd->bl.m].flag.gvg)
+							id = pc->search_inventory(sd, ITEMID_WOEWHITEPOT);
+						else if(map->list[sd->bl.m].flag.battleground)
+							id = pc->search_inventory(sd, ITEMID_BGWHITEPOT);
+						
+						if(id != INDEX_NOT_FOUND)
+							i = id;
+					}
+					else if(needed == ITEMID_BLUE_POTION)
+					{
+						if (map->list[sd->bl.m].flag.gvg)
+							id = pc->search_inventory(sd, ITEMID_WOEBLUEPOT);
+						else if(map->list[sd->bl.m].flag.battleground)
+							id = pc->search_inventory(sd, ITEMID_BGBLUEPOT);
+						else id = pc->search_inventory(sd,skill->dbs->db[skill_id].itemid[x]);
+						
+						if(id != INDEX_NOT_FOUND)
+							i = id;
+					}
+					
+					/* || skill->dbs->db[skill_id].itemid[x] <= 0*/
+					if (i == INDEX_NOT_FOUND) {
 						clif->skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0);
 						map->freeblock_unlock();
 						return 1;
@@ -7055,7 +7112,7 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 						return 1;
 					}
 					if( skill_id == AM_BERSERKPITCHER ) {
-						if (dstsd && dstsd->status.base_level < sd->inventory_data[i]->elv) {
+						if( dstsd && dstsd->status.base_level < (unsigned int)sd->inventory_data[i]->elv ) {
 							clif->skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0);
 							map->freeblock_unlock();
 							return 1;
@@ -7813,39 +7870,84 @@ int skill_castend_nodamage_id(struct block_list *src, struct block_list *bl, uin
 			break;
 
 		// Slim Pitcher
+		// read the  new_item_mode.с first!
 		case CR_SLIMPITCHER:
-			// Updated to block Slim Pitcher from working on barricades and guardian stones.
-			if (dstmd != NULL && (dstmd->class_ == MOBID_EMPELIUM || (dstmd->class_ >= MOBID_BARRICADE && dstmd->class_ <= MOBID_S_EMPEL_2)))
-				break;
-			if (script->potion_hp || script->potion_sp) {
-				int hp = script->potion_hp, sp = script->potion_sp;
-				hp = hp * (100 + (tstatus->vit<<1))/100;
-				sp = sp * (100 + (tstatus->int_<<1))/100;
-				if (dstsd) {
-					if (hp)
-						hp = hp * (100 + pc->checkskill(dstsd,SM_RECOVERY)*10 + pc->skillheal2_bonus(dstsd, skill_id))/100;
-					if (sp)
-						sp = sp * (100 + pc->checkskill(dstsd,MG_SRECOVERY)*10 + pc->skillheal2_bonus(dstsd, skill_id))/100;
+			if (sd) {
+				int i = skill_lv%11 - 1;
+				int j = pc->search_inventory(sd,skill->dbs->db[skill_id].itemid[i]);
+				int needed = skill->dbs->db[skill_id].itemid[i];
+				int id = INDEX_NOT_FOUND;
+				
+				if(needed == ITEMID_WHITE_SLIM_POTION)
+				{
+					if (map->list[sd->bl.m].flag.gvg)
+						id = pc->search_inventory(sd, ITEMID_WOESLIMPOT);
+					else if(map->list[sd->bl.m].flag.battleground)
+						id = pc->search_inventory(sd, ITEMID_BGSLIMPOT);
+					
+					if(id != INDEX_NOT_FOUND)
+						j = id;
 				}
-				if( tsc && tsc->count ) {
-					if (tsc->data[SC_CRITICALWOUND]) {
-						hp -= hp * tsc->data[SC_CRITICALWOUND]->val2 / 100;
-						sp -= sp * tsc->data[SC_CRITICALWOUND]->val2 / 100;
-					}
-					if (tsc->data[SC_DEATHHURT]) {
-						hp -= hp * 20 / 100;
-						sp -= sp * 20 / 100;
-					}
-					if( tsc->data[SC_WATER_INSIGNIA] && tsc->data[SC_WATER_INSIGNIA]->val1 == 2) {
-						hp += hp / 10;
-						sp += sp / 10;
+				
+				if (j == INDEX_NOT_FOUND || sd->inventory_data[j] == NULL || sd->status.inventory[j].amount < skill->dbs->db[skill_id].amount[i])
+				{
+					clif->skill_fail(sd,skill_id,USESKILL_FAIL_LEVEL,0);
+					return 1;
+				}
+				script->potion_flag = 1;
+				script->potion_hp = 0;
+				script->potion_sp = 0;
+				script->run_use_script(sd, sd->inventory_data[j], 0);
+				script->potion_flag = 0;
+				//Apply skill bonuses
+				i = pc->checkskill(sd,CR_SLIMPITCHER)*10
+					+ pc->checkskill(sd,AM_POTIONPITCHER)*10
+					+ pc->checkskill(sd,AM_LEARNINGPOTION)*5
+					+ pc->skillheal_bonus(sd, skill_id);
+
+				script->potion_hp = script->potion_hp * (100+i)/100;
+				script->potion_sp = script->potion_sp * (100+i)/100;
+
+				if(script->potion_hp > 0 || script->potion_sp > 0) {
+					int i,range = skill->get_splash(skill_id, skill_lv)+1;
+					int size = range*2+1;
+					for (i=0;i<size*size;i++) {
+						
+						int x = sd->bl.x+(i%size-range);
+						int y = sd->bl.y+(i/size-range);
+						map->foreachinarea(skill->area_sub,
+										   src->m,x-i,y-i,x+i,y+i,BL_CHAR,
+										   src,skill_id,skill_lv,tick,flag|BCT_PARTY|BCT_GUILD|1,
+										   skill->castend_nodamage_id);
 					}
 				}
-				if(hp > 0)
-					clif->skill_nodamage(NULL,bl,AL_HEAL,hp,1);
-				if(sp > 0)
-					clif->skill_nodamage(NULL,bl,MG_SRECOVERY,sp,1);
-				status->heal(bl,hp,sp,0);
+			} else {
+				int i = skill_lv%11 - 1;
+				struct item_data *item;
+				i = skill->dbs->db[skill_id].itemid[i];
+				item = itemdb->search(i);
+				script->potion_flag = 1;
+				script->potion_hp = 0;
+				script->potion_sp = 0;
+				script->run(item->script,0,src->id,0);
+				script->potion_flag = 0;
+				i = skill->get_max(CR_SLIMPITCHER)*10;
+
+				script->potion_hp = script->potion_hp * (100+i)/100;
+				script->potion_sp = script->potion_sp * (100+i)/100;
+
+				if(script->potion_hp > 0 || script->potion_sp > 0) {
+					int i,range = skill->get_splash(skill_id, skill_lv)+1;
+					int size = range*2+1;
+					for (i=0;i<size*size;i++) {
+						int x = sd->bl.x+(i%size-range);
+						int y = sd->bl.y+(i/size-range);
+						map->foreachinarea(skill->area_sub,
+										   src->m,x-i,y-i,x+i,y+i,BL_CHAR,
+										   src,skill_id,skill_lv,tick,flag|BCT_PARTY|BCT_GUILD|1,
+										   skill->castend_nodamage_id);
+					}
+				}
 			}
 			break;
 		// Full Chemical Protection
@@ -14873,35 +14975,293 @@ struct skill_condition skill_get_requirement(struct map_session_data* sd, uint16
 
 		req.itemid[i] = skill->dbs->db[idx].itemid[i];
 		req.amount[i] = skill->dbs->db[idx].amount[i];
-
 		if (itemid_isgemstone(req.itemid[i]) && skill_id != HW_GANBANTEIN) {
 			if (sd->special_state.no_gemstone) {
 				// All gem skills except Hocus Pocus and Ganbantein can cast for free with Mistress card [helvetica]
-				if (skill_id != SA_ABRACADABRA)
+				if( skill_id != SA_ABRACADABRA )
 					req.itemid[i] = req.amount[i] = 0;
-				else if (--req.amount[i] < 1)
+				else if( --req.amount[i] < 1 )
 					req.amount[i] = 1; // Hocus Pocus always use at least 1 gem
 			}
-			if (sc && sc->data[SC_INTOABYSS]) {
-				if (skill_id != SA_ABRACADABRA)
+			if(sc && sc->data[SC_INTOABYSS])
+			{
+				if( skill_id != SA_ABRACADABRA )
 					req.itemid[i] = req.amount[i] = 0;
-				else if (--req.amount[i] < 1)
+				else if( --req.amount[i] < 1 )
 					req.amount[i] = 1; // Hocus Pocus always use at least 1 gem
 			}
 			if (sc && sc->data[SC_MVPCARD_MISTRESS]) {
 				req.itemid[i] = req.amount[i] = 0;
 			}
-		}
-		if (skill_id >= HT_SKIDTRAP && skill_id <= HT_TALKIEBOX && pc->checkskill(sd, RA_RESEARCHTRAP) > 0) {
-			int16 item_index;
-			if ((item_index = pc->search_inventory(sd, req.itemid[i])) == INDEX_NOT_FOUND
-			  || sd->status.inventory[item_index].amount < req.amount[i]
-			) {
-				req.itemid[i] = ITEMID_SPECIAL_ALLOY_TRAP;
-				req.amount[i] = 1;
+			
+			// =========BY KUBIX
+			if( skill_id != SA_ABRACADABRA )
+			{
+				if (req.itemid[i] == ITEMID_BLUE_GEMSTONE)
+				{
+					if (map->list[sd->bl.m].flag.gvg)
+					{
+						int index = pc->search_inventory(sd, ITEMID_WOEBLUEGEMSTONE);
+
+						if (index != INDEX_NOT_FOUND && sd->status.inventory[index].amount >= req.amount[i])
+						{
+							req.itemid[i] = ITEMID_WOEBLUEGEMSTONE;
+						}
+					}
+					else if (map->list[sd->bl.m].flag.battleground)
+					{
+						int index = pc->search_inventory(sd, ITEMID_BGBLUEGEMSTONE);
+
+						if (index != INDEX_NOT_FOUND && sd->status.inventory[index].amount >= req.amount[i])
+						{
+							req.itemid[i] = ITEMID_BGBLUEGEMSTONE;
+						}
+					}
+				}
+				else if (req.itemid[i] == ITEMID_RED_GEMSTONE)
+				{
+					if (map->list[sd->bl.m].flag.gvg)
+					{
+						int index = pc->search_inventory(sd, ITEMID_WOEREDGEMSTONE);
+
+						if (index != INDEX_NOT_FOUND && sd->status.inventory[index].amount >= req.amount[i])
+						{
+							req.itemid[i] = ITEMID_WOEREDGEMSTONE;
+						}
+					}
+					else if (map->list[sd->bl.m].flag.battleground)
+					{
+						int index = pc->search_inventory(sd, ITEMID_BGREDGEMSTONE);
+
+						if (index != INDEX_NOT_FOUND && sd->status.inventory[index].amount >= req.amount[i])
+						{
+							req.itemid[i] = ITEMID_BGREDGEMSTONE;
+						}
+					}
+				}
+				else if (req.itemid[i] == ITEMID_YELLOW_GEMSTONE)
+				{
+					if (map->list[sd->bl.m].flag.gvg)
+					{
+						int index = pc->search_inventory(sd, ITEMID_WOEYELLOWGEMSTONE);
+
+						if (index != INDEX_NOT_FOUND && sd->status.inventory[index].amount >= req.amount[i])
+						{
+							req.itemid[i] = ITEMID_WOEYELLOWGEMSTONE;
+						}
+					}
+					else if (map->list[sd->bl.m].flag.battleground)
+					{
+						int index = pc->search_inventory(sd, ITEMID_BGYELLOWGEMSTONE);
+
+						if (index != INDEX_NOT_FOUND && sd->status.inventory[index].amount >= req.amount[i])
+						{
+							req.itemid[i] = ITEMID_BGYELLOWGEMSTONE;
+						}
+					}
+				}
 			}
-			break;
+			// =========BY KUBIX
+		}		
+// Special BG & WoE items by Kubix
+		if (req.itemid[i] == ITEMID_ACID_BOTTLE)
+		{
+			if (map->list[sd->bl.m].flag.gvg)
+			{
+				int index = pc->search_inventory(sd, ITEMID_WOE_ACID_BOTTLE);
+
+				if (index != INDEX_NOT_FOUND && sd->status.inventory[index].amount >= req.amount[i])
+				{
+					req.itemid[i] = ITEMID_WOE_ACID_BOTTLE;
+				}
+			}
+			else if (map->list[sd->bl.m].flag.battleground)
+			{
+				int index = pc->search_inventory(sd, ITEMID_BG_ACID_BOTTLE);
+
+				if (index != INDEX_NOT_FOUND && sd->status.inventory[index].amount >= req.amount[i])
+				{
+					req.itemid[i] = ITEMID_BG_ACID_BOTTLE;
+				}
+			}
 		}
+		else if (req.itemid[i] == ITEMID_FIRE_BOTTLE)
+		{
+			if (map->list[sd->bl.m].flag.gvg)
+			{
+				int index = pc->search_inventory(sd, ITEMID_WOE_FIRE_BOTTLE);
+
+				if (index != INDEX_NOT_FOUND && sd->status.inventory[index].amount >= req.amount[i])
+				{
+					req.itemid[i] = ITEMID_WOE_FIRE_BOTTLE;
+				}
+			}
+			else if (map->list[sd->bl.m].flag.battleground)
+			{
+				int index = pc->search_inventory(sd, ITEMID_BG_FIRE_BOTTLE);
+
+				if (index != INDEX_NOT_FOUND && sd->status.inventory[index].amount >= req.amount[i])
+				{
+					req.itemid[i] = ITEMID_BG_FIRE_BOTTLE;
+				}
+			}
+		}
+		
+		if(req.itemid[i] == ITEMID_POISON_BOTTLE) // EDP
+		{
+			if (map->list[sd->bl.m].flag.gvg)
+			{
+				int index = pc->search_inventory(sd, ITEMID_WOEEDP);
+
+				if (index != INDEX_NOT_FOUND && sd->status.inventory[index].amount >= req.amount[i])
+				{
+					req.itemid[i] = ITEMID_WOEEDP;
+				}
+			}
+			else if (map->list[sd->bl.m].flag.battleground)
+			{
+				int index = pc->search_inventory(sd, ITEMID_BGEDP);
+
+				if (index != INDEX_NOT_FOUND && sd->status.inventory[index].amount >= req.amount[i])
+				{
+					req.itemid[i] = ITEMID_BGEDP;
+				}
+			}
+		}
+		
+		if(req.itemid[i] == ITEMID_COBWEB) // Cobweb
+		{
+			if (map->list[sd->bl.m].flag.gvg)
+			{
+				int index = pc->search_inventory(sd, ITEMID_WOECOBWEB);
+
+				if (index != INDEX_NOT_FOUND && sd->status.inventory[index].amount >= req.amount[i])
+				{
+					req.itemid[i] = ITEMID_WOECOBWEB;
+				}
+			}
+			else if (map->list[sd->bl.m].flag.battleground)
+			{
+				int index = pc->search_inventory(sd, ITEMID_BGCOBWEB);
+
+				if (index != INDEX_NOT_FOUND && sd->status.inventory[index].amount >= req.amount[i])
+				{
+					req.itemid[i] = ITEMID_BGCOBWEB;
+				}
+			}			
+		}
+		
+		if(req.itemid[i] == ITEMID_COATING_BOTTLE) // Creator's
+		{
+			if (map->list[sd->bl.m].flag.gvg)
+			{
+				int index = pc->search_inventory(sd, ITEMID_WOEGLISTENING);
+
+				if (index != INDEX_NOT_FOUND && sd->status.inventory[index].amount >= req.amount[i])
+				{
+					req.itemid[i] = ITEMID_WOEGLISTENING;
+				}
+			}
+			else if (map->list[sd->bl.m].flag.battleground)
+			{
+				int index = pc->search_inventory(sd, ITEMID_BGGLISTENING);
+
+				if (index != INDEX_NOT_FOUND && sd->status.inventory[index].amount >= req.amount[i])
+				{
+					req.itemid[i] = ITEMID_BGGLISTENING;
+				}
+			}			
+		}
+		
+		if(req.itemid[i] == ITEMID_MENEATER_PLANT_BOTTLE)
+		{
+			if (map->list[sd->bl.m].flag.gvg)
+			{
+				int index = pc->search_inventory(sd, ITEMID_WOEPLANTBOTTLE);
+
+				if (index != INDEX_NOT_FOUND && sd->status.inventory[index].amount >= req.amount[i])
+				{
+					req.itemid[i] = ITEMID_WOEPLANTBOTTLE;
+				}
+			}
+			else if (map->list[sd->bl.m].flag.battleground)
+			{
+				int index = pc->search_inventory(sd, ITEMID_BGPLANTBOTTLE);
+
+				if (index != INDEX_NOT_FOUND && sd->status.inventory[index].amount >= req.amount[i])
+				{
+					req.itemid[i] = ITEMID_BGPLANTBOTTLE;
+				}
+			}		
+		}
+			
+		if(req.itemid[i] == ITEMID_WHITE_SLIM_POTION)
+		{
+			if (map->list[sd->bl.m].flag.gvg)
+			{
+				int index = pc->search_inventory(sd, ITEMID_WOESLIMPOT);
+
+				if (index != INDEX_NOT_FOUND && sd->status.inventory[index].amount >= req.amount[i])
+				{
+					req.itemid[i] = ITEMID_WOESLIMPOT;
+				}
+			}
+			else if (map->list[sd->bl.m].flag.battleground)
+			{
+				int index = pc->search_inventory(sd, ITEMID_BGSLIMPOT);
+
+				if (index != INDEX_NOT_FOUND && sd->status.inventory[index].amount >= req.amount[i])
+				{
+					req.itemid[i] = ITEMID_BGSLIMPOT;
+				}
+			}			
+		}
+
+		if(req.itemid[i] == ITEMID_WHITE_POTION)
+		{
+			if (map->list[sd->bl.m].flag.gvg)
+			{
+				int index = pc->search_inventory(sd, ITEMID_WOEWHITEPOT);
+
+				if (index != INDEX_NOT_FOUND && sd->status.inventory[index].amount >= req.amount[i])
+				{
+					req.itemid[i] = ITEMID_WOEWHITEPOT;
+				}
+			}
+			else if (map->list[sd->bl.m].flag.battleground)
+			{
+				int index = pc->search_inventory(sd, ITEMID_BGWHITEPOT);
+
+				if (index != INDEX_NOT_FOUND && sd->status.inventory[index].amount >= req.amount[i])
+				{
+					req.itemid[i] = ITEMID_BGWHITEPOT;
+				}
+			}			
+		}
+		
+		if(req.itemid[i] == ITEMID_BLUE_POTION)
+		{
+			if (map->list[sd->bl.m].flag.gvg)
+			{
+				int index = pc->search_inventory(sd, ITEMID_WOEBLUEPOT);
+
+				if (index != INDEX_NOT_FOUND && sd->status.inventory[index].amount >= req.amount[i])
+				{
+					req.itemid[i] = ITEMID_WOEBLUEPOT;
+				}
+			}
+			else if (map->list[sd->bl.m].flag.battleground)
+			{
+				int index = pc->search_inventory(sd, ITEMID_BGBLUEPOT);
+
+				if (index != INDEX_NOT_FOUND && sd->status.inventory[index].amount >= req.amount[i])
+				{
+					req.itemid[i] = ITEMID_BGBLUEPOT;
+				}
+			}			
+		}
+		// Special BG & WoE items by Kubix
+		
 	}
 
 	/* requirements are level-dependent */

@@ -3892,6 +3892,52 @@ ACMD(mapinfo)
 		strcat(atcmd_output, msg_fd(fd,1096)); // PartyLock |
 	if (map->list[m_id].flag.guildlock)
 		strcat(atcmd_output, msg_fd(fd,1097)); // GuildLock |
+	if (map->list[m_id].flag.mall01)
+        strcat(atcmd_output, "mall01 |");
+	if (map->list[m_id].flag.bat_a03)
+		strcat(atcmd_output, "bat_a03 |");
+	if (map->list[m_id].flag.bat_a04)
+		strcat(atcmd_output, "bat_a04 |");
+	if (map->list[m_id].flag.bat_a05)
+		strcat(atcmd_output, "bat_a05 |");
+	if (map->list[m_id].flag.bat_b03)
+		strcat(atcmd_output, "bat_b03 |");
+	if (map->list[m_id].flag.bat_b04)
+		strcat(atcmd_output, "bat_b04 |");
+	if (map->list[m_id].flag.bat_b05)
+		strcat(atcmd_output, "bat_b05 |");
+	if (map->list[m_id].flag.schg_cas06)
+		strcat(atcmd_output, "schg_cas06 |");
+	if (map->list[m_id].flag.schg_cas07)
+		strcat(atcmd_output, "schg_cas07 |");
+	if (map->list[m_id].flag.schg_cas08)
+		strcat(atcmd_output, "schg_cas08 |");
+	if (map->list[m_id].flag.arug_cas06)
+		strcat(atcmd_output, "arug_cas06 |");
+	if (map->list[m_id].flag.arug_cas07)
+		strcat(atcmd_output, "arug_cas07 |");
+	if (map->list[m_id].flag.arug_cas08)
+		strcat(atcmd_output, "arug_cas08 |");
+	if (map->list[m_id].flag.rush_cas01)
+		strcat(atcmd_output, "rush_cas01 |");
+	if (map->list[m_id].flag.rush_cas02)
+		strcat(atcmd_output, "rush_cas02 |");
+	if (map->list[m_id].flag.rush_cas03)
+		strcat(atcmd_output, "rush_cas03 |");
+	if (map->list[m_id].flag.rush_cas04)
+		strcat(atcmd_output, "rush_cas04 |");
+	if (map->list[m_id].flag.bat_c04)
+		strcat(atcmd_output, "bat_c04 |");
+	if (map->list[m_id].flag.bat_c05)
+		strcat(atcmd_output, "bat_c05 |");
+	if (map->list[m_id].flag.bat_c06)
+		strcat(atcmd_output, "bat_c06 |");
+	if (map->list[m_id].flag.bat_c07)
+		strcat(atcmd_output, "bat_c07 |");
+	if (map->list[m_id].flag.bat_c08)
+		strcat(atcmd_output, "bat_c08 |");
+	if (map->list[m_id].flag.region_8)
+		strcat(atcmd_output, "region_8 |");
 	if (map->list[m_id].flag.noviewid != EQP_NONE)
 		strcat(atcmd_output, msg_fd(fd,1079)); // NoViewID |
 	clif->message(fd, atcmd_output);
@@ -7530,6 +7576,29 @@ ACMD(mapflag) {
 		CHECKFLAG(nodrop);            CHECKFLAG(novending);          CHECKFLAG(loadevent);
 		CHECKFLAG(nochat);            CHECKFLAG(partylock);          CHECKFLAG(guildlock);    CHECKFLAG(src4instance);
 		CHECKFLAG(notomb);            CHECKFLAG(nocashshop);         CHECKFLAG(noviewid);
+		CHECKFLAG(mall01);
+		CHECKFLAG(bat_a03);
+		CHECKFLAG(bat_a04);
+		CHECKFLAG(bat_a05);
+		CHECKFLAG(bat_b03);
+		CHECKFLAG(bat_b04);
+		CHECKFLAG(bat_b05);
+		CHECKFLAG(schg_cas06);
+		CHECKFLAG(schg_cas07);
+		CHECKFLAG(schg_cas08);
+		CHECKFLAG(arug_cas06);
+		CHECKFLAG(arug_cas07);
+		CHECKFLAG(arug_cas08);
+		CHECKFLAG(rush_cas01);
+		CHECKFLAG(rush_cas02);
+		CHECKFLAG(rush_cas03);
+		CHECKFLAG(rush_cas04);
+		CHECKFLAG(bat_c04);
+		CHECKFLAG(bat_c05);
+		CHECKFLAG(bat_c06);
+		CHECKFLAG(bat_c07);
+		CHECKFLAG(bat_c08);
+		CHECKFLAG(region_8);
 		clif->message(sd->fd," ");
 		clif->message(sd->fd,msg_fd(fd,1312)); // Usage: "@mapflag monster_noteleport 1" (0=Off | 1=On)
 		clif->message(sd->fd,msg_fd(fd,1313)); // Type "@mapflag available" to list the available mapflags.
@@ -7567,7 +7636,29 @@ ACMD(mapflag) {
 	SETFLAG(nodrop);            SETFLAG(novending);          SETFLAG(loadevent);
 	SETFLAG(nochat);            SETFLAG(partylock);          SETFLAG(guildlock);    SETFLAG(src4instance);
 	SETFLAG(notomb);            SETFLAG(nocashshop);         SETFLAG(noviewid);
-
+	SETFLAG(mall01);
+	SETFLAG(bat_a03);
+	SETFLAG(bat_a04);
+	SETFLAG(bat_a05);
+	SETFLAG(bat_b03);
+	SETFLAG(bat_b04);
+	SETFLAG(bat_b05);
+	SETFLAG(schg_cas06);
+	SETFLAG(schg_cas07);
+	SETFLAG(schg_cas08);
+	SETFLAG(arug_cas06);
+	SETFLAG(arug_cas07);
+	SETFLAG(arug_cas08);
+	SETFLAG(rush_cas01);
+	SETFLAG(rush_cas02);
+	SETFLAG(rush_cas03);
+	SETFLAG(rush_cas04);
+	SETFLAG(bat_c04);
+	SETFLAG(bat_c05);
+	SETFLAG(bat_c06);
+	SETFLAG(bat_c07);
+	SETFLAG(bat_c08);
+	SETFLAG(region_8);
 	clif->message(sd->fd,msg_fd(fd,1314)); // Invalid flag name or flag.
 	clif->message(sd->fd,msg_fd(fd,1312)); // Usage: "@mapflag monster_noteleport 1" (0=Off | 1=On)
 	clif->message(sd->fd,msg_fd(fd,1315)); // Available Flags:
@@ -7578,7 +7669,9 @@ ACMD(mapflag) {
 	clif->message(sd->fd,"nozenypenalty, notrade, noskill, nowarp, nowarpto, noicewall, snow, clouds, clouds2,");
 	clif->message(sd->fd,"fog, fireworks, sakura, leaves, nobaseexp, nojobexp, nomobloot,");
 	clif->message(sd->fd,"nomvploot, nightenabled, nodrop, novending, loadevent, nochat, partylock,");
-	clif->message(sd->fd,"guildlock, src4instance, notomb, nocashshop, noviewid");
+	clif->message(sd->fd,"guildlock, src4instance, notomb, nocashshop, noviewid, mall01bat_a03, bat_a04, bat_a05, bat_b03, bat_b04, bat_b05, schg_cas06, schg_cas07");
+	clif->message(sd->fd,"schg_cas08, arug_cas06, arug_cas07, arug_cas08, rush_cas01, rush_cas02");
+	clif->message(sd->fd,"rush_cas03, rush_cas04, bat_c04, bat_c05, bat_c06, bat_c07, bat_c08, region_8");
 #undef CHECKFLAG
 #undef SETFLAG
 

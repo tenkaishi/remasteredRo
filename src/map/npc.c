@@ -4285,6 +4285,53 @@ const char *npc_parse_mapflag(const char *w1, const char *w2, const char *w3, co
 		map->list[m].flag.partylock=state;
 	else if (!strcmpi(w3,"guildlock"))
 		map->list[m].flag.guildlock=state;
+	else if (!strcmpi(w3,"mall01"))
+ 		map->list[m].flag.mall01=state;
+	else if (!strcmpi(w3, "bat_a03"))
+		map->list[m].flag.bat_a03 = state;
+	else if (!strcmpi(w3, "bat_a04"))
+		map->list[m].flag.bat_a04 = state;
+	else if (!strcmpi(w3, "bat_a05"))
+		map->list[m].flag.bat_a05 = state;
+	else if (!strcmpi(w3, "bat_b03"))
+		map->list[m].flag.bat_b03 = state;
+	else if (!strcmpi(w3, "bat_b04"))
+		map->list[m].flag.bat_b04 = state;
+	else if (!strcmpi(w3, "bat_b05"))
+		map->list[m].flag.bat_b05 = state;
+	else if (!strcmpi(w3, "schg_cas06"))
+		map->list[m].flag.schg_cas06 = state;
+	else if (!strcmpi(w3, "schg_cas07"))
+		map->list[m].flag.schg_cas07 = state;
+	else if (!strcmpi(w3, "schg_cas08"))
+		map->list[m].flag.schg_cas08 = state;
+	else if (!strcmpi(w3, "arug_cas06"))
+		map->list[m].flag.arug_cas06 = state;
+	else if (!strcmpi(w3, "arug_cas07"))
+		map->list[m].flag.arug_cas07 = state;
+	else if (!strcmpi(w3, "arug_cas08"))
+		map->list[m].flag.arug_cas08 = state;
+	else if (!strcmpi(w3, "rush_cas01"))
+		map->list[m].flag.rush_cas01 = state;
+	else if (!strcmpi(w3, "rush_cas02"))
+		map->list[m].flag.rush_cas02 = state;
+	else if (!strcmpi(w3, "rush_cas03"))
+		map->list[m].flag.rush_cas03 = state;
+	else if (!strcmpi(w3, "rush_cas04"))
+		map->list[m].flag.rush_cas04 = state;
+	else if (!strcmpi(w3, "bat_c04"))
+		map->list[m].flag.bat_c04 = state;
+	else if (!strcmpi(w3, "bat_c05"))
+		map->list[m].flag.bat_c05 = state;
+	else if (!strcmpi(w3, "bat_c06"))
+		map->list[m].flag.bat_c06 = state;
+	else if (!strcmpi(w3, "bat_c07"))
+		map->list[m].flag.bat_c07 = state;
+	else if (!strcmpi(w3, "bat_c08"))
+		map->list[m].flag.bat_c08 = state;
+	else if (!strcmpi(w3, "region_8"))
+		map->list[m].flag.region_8 = state;
+
 	else if (!strcmpi(w3,"reset"))
 		map->list[m].flag.reset=state;
 	else if (!strcmpi(w3,"notomb"))

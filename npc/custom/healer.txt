@@ -1,78 +1,184 @@
 //===== Hercules Script ======================================
-//= Healer
+//= Healeur
 //===== By: ==================================================
 //= Euphy
 //===== Current Version: =====================================
 //= 1.2
 //===== Description: =========================================
-//= Basic healer script.
+//= Basic Healeur script.
 //===== Additional Comments: =================================
 //= 1.0 Initial script.
 //= 1.1 Aligned coordinates with @go.
 //= 1.2 Fix variables and character stuck at healing
 //============================================================
 
--	script	Healer	FAKE_NPC,{
-
-	.@price = 0;	// Zeny required for heal
-	.@Buffs = 0;	// Also buff players? (1: yes / 0: no)
-	.@Delay = 0;	// Heal delay, in seconds
-
-	if (@HD > gettimetick(2)) end;
-	if (.@price) {
-		message strcharinfo(PC_NAME),"Healing costs "+.@price+" Zeny.";
-		if (Zeny < .@price) end;
-		if(select("^0055FFHeal^000000", "^777777Cancel^000000") == 2) close;
-		Zeny -= .@price;
+-	script	Healeur	4_M_LAZY,{
+if (@healdelay > gettimetick(2)) {
+		if ( ( @healdelay - gettimetick(2)) > 60 ) {
+			message strcharinfo(0), ( (@healdelay - gettimetick(2)) / 60 )+" mininute(s) "+ ( (@healdelay - gettimetick(2)) - 60 ) + " seconde(s) avant de pouvoir reutiliser le Healeur.";
+		}
+		else {
+			message strcharinfo(0), ( @healdelay - gettimetick(2) )+" seconde(s) avant de pouvoir reutiliser le Healeur.";
+		}
+		end;
+	}
+	if (.healprice) {
+		message strcharinfo(0),"Healing costs "+(.healprice >= 1000 ?callfunc("F_InsertComma",.healprice,3,","):.healprice)+" Zeny.";
+		if (Zeny < .healprice) {
+			message strcharinfo(0),"You don't have enough zeny to heal.";
+			end;
+		}
+		if(select("^0055FFHeal^000000:^777777Cancel^000000") == 2) close;
+		Zeny -= .healprice;
 	}
 	specialeffect2 EF_HEAL2; percentheal 100,100;
-	if (.@Buffs) {
-		specialeffect2 EF_INCAGILITY; sc_start SC_INC_AGI,240000,10;
-		specialeffect2 EF_BLESSING; sc_start SC_BLESSING,240000,10;
+	specialeffect2 235;
+	sc_end	SC_STONE;
+	sc_end	SC_FREEZE;
+	sc_end	SC_STUN;
+	sc_end	SC_SLEEP;
+	sc_end	SC_POISON;
+	sc_end	SC_CURSE;
+	sc_end	SC_SILENCE;
+	sc_end	SC_CONFUSION;
+	sc_end	SC_BLIND;
+	sc_end	SC_BLOODING;
+	sc_end	SC_DPOISON ;
+	sc_end	SC_FEAR;
+	sc_end	SC_COLD;
+	sc_end	SC_BURNING;
+	sc_end	SC_DEEP_SLEEP;
+	
+	if (.healbuffs) {
+		freeloop(1);
+		for (.@i = 0; .@i < getarraysize (.Bufflist); .@i = .@i + 5) {
+			if ( .Bufflist[.@i+4] ) {
+				if (.Bufflist[.@i+3]) {
+					specialeffect2 .Bufflist[.@i+3];
+				}
+				sc_start .Bufflist[.@i], .Bufflist[.@i + 1] * 60000,.Bufflist[.@i+2];
+			}
+		}
+		freeloop(0);
 	}
-	if (.@Delay) @HD = gettimetick(2)+.@Delay;
+
+	if (.identify) {
+		getinventorylist;
+		freeloop(1);
+		for( set .@i,0; .@i < @inventorylist_count; ++.@i ) {
+			if (!@inventorylist_identify[.@i]) { ++@unidentified; }
+		}
+		freeloop(0);
+		if (@unidentified) {
+			if (.identifyprice) {
+				message strcharinfo(0),"Identify costs "+(.identifyprice >= 1000 ?callfunc("F_InsertComma",.identifyprice,3,","):.identifyprice)+" Zeny for each items.";
+			if(select("^0055FFIdentify^000000:^777777Cancel^000000") == 2) close; }
+		}
+		freeloop(1);
+		for( set .@i,0; .@i < @inventorylist_count; ++.@i ) {
+			if (@inventorylist_identify[.@i]) continue;
+			if (countitem(611)) { // Magnifier
+				delitem 611,1;
+			}
+			else {
+			if (.identifyprice) {
+				if (Zeny < .identifyprice) {
+					message strcharinfo(0),"You don't have enough zeny to identify items.";
+					break;
+				}
+				Zeny -= .identifyprice;
+			}
+			}
+			delitem2 @inventorylist_id[.@i],@inventorylist_amount[.@i],0,0,0,0,0,0,0;
+			getitem @inventorylist_id[.@i],@inventorylist_amount[.@i];
+		}
+		freeloop(0);
+		@unidentified = 0;
+	}
+
+	if (.repair) {
+		if (getbrokencount() >= 1) {
+			if (.repairprice) {
+				@repairprice = .repairprice * getbrokencount();
+				message strcharinfo(0),"Repair costs "+(@repairprice >= 1000 ?callfunc("F_InsertComma",@repairprice,3,","):@repairprice)+" Zeny for "+getbrokencount()+" broken items.";
+			if (Zeny < @repairprice) {
+				message strcharinfo(0),"You don't have enough zeny to repair items.";
+				close;
+				end;
+			}
+			if(select("^0055FFRepair^000000:^777777Cancel^000000") == 2) close;
+			Zeny -= @repairprice;
+			}
+		repairall;
+		}
+	}
+
+	if (.healdelay) @healdelay = gettimetick(2)+.healdelay;
+	close;
+	end;
+
+OnInit:
+	.healprice = 0;	// Required Zeny to heal
+	.healbuffs = 1;	// Enable additional buffs listed in the Bufflist (1: yes / 0: no)
+	.healdelay = 5;	// Delay to use Healeur in seconds
+	.identify = 1;	// Enable auto identify
+	.identifyprice = 0;	// Zeny to deduct for identifying items
+	.repair = 1;	// Enable auto repair of broken items
+	.repairprice = 0;	// Zeny to deduct for repairing broken items
+
+	// Each buff contains 5 variables
+	// <Type>,<Duration>,<Rate>,<Effect>,<ON/OFF>, // Buff 1
+	// <Type>,<Duration>,<Rate>,<Effect>,<ON/OFF>, // Buff 2
+	//   ...;
+	//
+	//  Example: SC_INC_AGI,30,10,EF_INCAGILITY,1,
+	//    -Turns ON Healeur to give player Level 10 Increase Agi for 30 mins with EF_INCAGILITY as effect
+	//    -For a full list of SC_ and EF_ check db/const.conf
+	//setarray .Bufflist[0],SC_INC_AGI,30,10,0,1,SC_BLESSING,30,10,0,1;
+    setarray .Bufflist[0],SC_INC_AGI,30,10,0,1,SC_BLESSING,30,10,0,1;         
 	end;
 }
+ 
 
 
 // Duplicates
 //============================================================
-alberta,25,240,6	duplicate(Healer)	Healer#alb	4_PORING
-aldebaran,135,118,6	duplicate(Healer)	Healer#alde	4_PORING
-amatsu,200,79,4	duplicate(Healer)	Healer#ama	4_PORING
-ayothaya,207,169,6	duplicate(Healer)	Healer#ayo	4_PORING
-comodo,184,158,6	duplicate(Healer)	Healer#com	4_PORING
-einbech,57,36,6	duplicate(Healer)	Healer#einbe	4_PORING
-einbroch,57,202,6	duplicate(Healer)	Healer#einbr	4_PORING
-geffen,115,72,6	duplicate(Healer)	Healer#gef	4_PORING
-gonryun,156,122,6	duplicate(Healer)	Healer#gon	4_PORING
-hugel,89,150,6	duplicate(Healer)	Healer#hug	4_PORING
-izlude,125,118,5	duplicate(Healer)	Healer#izl	4_PORING
-jawaii,250,139,4	duplicate(Healer)	Healer#jaw	4_PORING
-lighthalzen,152,100,6	duplicate(Healer)	Healer#lhz	4_PORING
-louyang,226,103,4	duplicate(Healer)	Healer#lou	4_PORING
-manuk,272,144,6	duplicate(Healer)	Healer#man	4_PORING
-mid_camp,203,289,6	duplicate(Healer)	Healer#mid	4_PORING
-moc_ruins,72,164,4	duplicate(Healer)	Healer#moc	4_PORING
-morocc,153,97,6	duplicate(Healer)	Healer#mor	4_PORING
-moscovia,220,191,4	duplicate(Healer)	Healer#mos	4_PORING
-niflheim,212,182,5	duplicate(Healer)	Healer#nif	4_PORING
-payon,179,106,4	duplicate(Healer)	Healer#pay	4_PORING
-prontera,162,193,4	duplicate(Healer)	Healer#prt	4_PORING
-rachel,125,116,6	duplicate(Healer)	Healer#rac	4_PORING
-splendide,201,153,4	duplicate(Healer)	Healer#spl	4_PORING
-thor_camp,249,74,4	duplicate(Healer)	Healer#thor	4_PORING
-umbala,105,148,3	duplicate(Healer)	Healer#umb	4_PORING
-veins,217,121,4	duplicate(Healer)	Healer#ve	4_PORING
-xmas,143,136,4	duplicate(Healer)	Healer#xmas	4_PORING
-yuno,164,45,4	duplicate(Healer)	Healer#yuno	4_PORING
+alberta,25,240,6	duplicate(Healeur)	Healeur#alb	4_M_LAZY
+aldebaran,135,118,6	duplicate(Healeur)	Healeur#alde	4_M_LAZY
+amatsu,200,79,4	duplicate(Healeur)	Healeur#ama	4_M_LAZY
+ayothaya,207,169,6	duplicate(Healeur)	Healeur#ayo	4_M_LAZY
+comodo,184,158,6	duplicate(Healeur)	Healeur#com	4_M_LAZY
+einbech,57,36,6	duplicate(Healeur)	Healeur#einbe	4_M_LAZY
+einbroch,57,202,6	duplicate(Healeur)	Healeur#einbr	4_M_LAZY
+geffen,115,72,6	duplicate(Healeur)	Healeur#gef	4_M_LAZY
+gonryun,156,122,6	duplicate(Healeur)	Healeur#gon	4_M_LAZY
+hugel,89,150,6	duplicate(Healeur)	Healeur#hug	4_M_LAZY
+izlude,125,118,5	duplicate(Healeur)	Healeur#izl	4_M_LAZY
+jawaii,250,139,4	duplicate(Healeur)	Healeur#jaw	4_M_LAZY
+lighthalzen,152,100,6	duplicate(Healeur)	Healeur#lhz	4_M_LAZY
+louyang,226,103,4	duplicate(Healeur)	Healeur#lou	4_M_LAZY
+manuk,272,144,6	duplicate(Healeur)	Healeur#man	4_M_LAZY
+mid_camp,203,289,6	duplicate(Healeur)	Healeur#mid	4_M_LAZY
+moc_ruins,72,164,4	duplicate(Healeur)	Healeur#moc	4_M_LAZY
+morocc,153,97,6	duplicate(Healeur)	Healeur#mor	4_M_LAZY
+moscovia,220,191,4	duplicate(Healeur)	Healeur#mos	4_M_LAZY
+niflheim,212,182,5	duplicate(Healeur)	Healeur#nif	4_M_LAZY
+payon,179,106,4	duplicate(Healeur)	Healeur#pay	4_M_LAZY
+prontera,162,191,4	duplicate(Healeur)	Healeur#prt	4_M_LAZY
+rachel,125,116,6	duplicate(Healeur)	Healeur#rac	4_M_LAZY
+splendide,201,153,4	duplicate(Healeur)	Healeur#spl	4_M_LAZY
+thor_camp,249,74,4	duplicate(Healeur)	Healeur#thor	4_M_LAZY
+umbala,105,148,3	duplicate(Healeur)	Healeur#umb	4_M_LAZY
+veins,217,121,4	duplicate(Healeur)	Healeur#ve	4_M_LAZY
+xmas,143,136,4	duplicate(Healeur)	Healeur#xmas	4_M_LAZY
+yuno,164,45,4	duplicate(Healeur)	Healeur#yuno	4_M_LAZY
 
 // Duplicates (Renewal)
 //============================================================
-brasilis,194,221,6	duplicate(Healer)	Healer#bra	4_PORING
-dewata,195,187,4	duplicate(Healer)	Healer#dew	4_PORING
-dicastes01,201,194,4	duplicate(Healer)	Healer#dic	4_PORING
-ecl_in01,45,60,4	duplicate(Healer)	Healer#ecl	4_PORING
-malangdo,132,114,6	duplicate(Healer)	Healer#mal	4_PORING
-malaya,205,205,6	duplicate(Healer)	Healer#ma	4_PORING
-mora,55,152,4	duplicate(Healer)	Healer#mora	4_PORING
+brasilis,194,221,6	duplicate(Healeur)	Healeur#bra	4_M_LAZY
+dewata,195,187,4	duplicate(Healeur)	Healeur#dew	4_M_LAZY
+dicastes01,201,194,4	duplicate(Healeur)	Healeur#dic	4_M_LAZY
+ecl_in01,45,60,4	duplicate(Healeur)	Healeur#ecl	4_M_LAZY
+malangdo,132,114,6	duplicate(Healeur)	Healeur#mal	4_M_LAZY
+malaya,205,205,6	duplicate(Healeur)	Healeur#ma	4_M_LAZY
+mora,55,152,4	duplicate(Healeur)	Healeur#mora	4_M_LAZY
